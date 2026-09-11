@@ -2,6 +2,7 @@
 package db
 
 type User struct {
+	ID    int
 	Name  string
 	Team  string // FK team
 	Score float64

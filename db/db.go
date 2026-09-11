@@ -16,10 +16,12 @@ var (
 	DBSaveRate = flag.Duration("db-save-rate", 1*time.Second, "How often at minimum the DB should be saved")
 )
 
-var DB = struct {
+type Database struct {
 	Users []User
 	Teams []Team
-}{}
+}
+
+var DB = Database{}
 
 func Start() error {
 	if *DBLoad {
@@ -57,4 +59,13 @@ func Save() error {
 		return err
 	}
 	return os.WriteFile(*DBFilePath, bs, 0x666)
+}
+
+func GetName(ID int) (string, bool) {
+	for _, user := range DB.Users {
+		if user.ID == ID {
+			return user.Name, true
+		}
+	}
+	return "", false
 }
