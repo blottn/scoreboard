@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var LeaseLength = flag.Duration("-lease-length", 1*time.Minute, "how long leases are held without a message")
+var LeaseLength = flag.Duration("lease-length", 1*time.Minute, "how long leases are held without a message")
 
 type Lease struct {
 	PlayerID int

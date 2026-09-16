@@ -21,7 +21,10 @@ type Database struct {
 	Teams []Team
 }
 
-var DB = Database{}
+var DB = Database{
+	Users: []User{},
+	Teams: []Team{},
+}
 
 func Start() error {
 	if *DBLoad {
@@ -41,6 +44,11 @@ func Start() error {
 				}
 			}
 		}()
+	}
+	for _, usr := range DB.Users {
+		if usr.ID > lastID {
+			lastID = usr.ID
+		}
 	}
 	return nil
 }
