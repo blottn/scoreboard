@@ -5,6 +5,10 @@ body {
     mix-blend-mode: difference;
 }
 
+* { 
+    color: white;
+}
+
 nav {
     display: flex;
     justify-content: space-between;

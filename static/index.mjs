@@ -1,5 +1,7 @@
 import { getDB } from "./util.mjs";
 
+let { Users, Teams } = await getDB()
+
 
 // Scoreboard
 let scoreBody = document.querySelector("#scores tbody");
@@ -51,7 +53,6 @@ const updateTeamRow = ({Name, Color}) => {
 }
 // End Teams
 
-let { Users, Teams } = await getDB()
 Users.forEach((user) => {
     console.log(user);
     makeScoreRow(user)
