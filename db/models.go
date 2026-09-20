@@ -25,10 +25,32 @@ func NewUser(name, team string) *User {
 	}
 	lastID += 1
 	DB.Users = append(DB.Users, usr)
+	NewTeam(team, "yellow")
 	return &usr
 }
 
 type Team struct {
 	Name  string
-	Color float64 // I guess?
+	Color string // I guess?
+}
+
+func NewTeam(name string, color string) *Team {
+	slog.Info(fmt.Sprintf("attempting to create team: %s", name))
+	var found *Team
+	for _, team := range DB.Teams {
+		if team.Name == name {
+			slog.Info("found existing team, updating to match request")
+			team.Color = color
+			found = &team
+		}
+	}
+	if found != nil {
+		return found
+	}
+	t := Team{
+		name, color,
+	}
+	slog.Info(fmt.Sprintf("created team: %s", name))
+	DB.Teams = append(DB.Teams, t)
+	return &t
 }
