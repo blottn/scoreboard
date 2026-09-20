@@ -1,12 +1,7 @@
-
-const getDB = async () => {
-    let resp = await fetch("/db")
-    let db = await resp.json();
-    console.log(`current db:`,  db);
-    return db;
-}
+import { getDB } from "./util.mjs";
 
 
+// Scoreboard
 let scoreBody = document.querySelector("#scores tbody");
 let scoreTmpl = document.querySelector("#scores > table > tbody > template");
 const makeScoreRow = ({ID, Name, Team, Score}) => {
@@ -31,12 +26,41 @@ const updateScoreRow = ({ID, Name, Team, Score}) => {
     score.textContent = Score;
 }
 
-let { Users } = await getDB()
+// End scoreboard
+
+
+// Teams
+let teamBody = document.querySelector("#teams tbody");
+let teamTmpl = document.querySelector("#teams > table > tbody > template");
+const makeTeamRow = ({Name, Color}) => {
+    const clone = document.importNode(teamTmpl.content, true);
+    clone.firstElementChild.id = Name;
+    let name = clone.querySelector(".teamName");
+    name.textContent = Name;
+    let team = clone.querySelector(".teamTotalScore");
+    team.textContent = "0"; // TODO calcoolate
+    teamBody.appendChild(clone);
+}
+
+const updateTeamRow = ({Name, Color}) => {
+    let el = document.getElementById(Name);
+    let name = el.querySelector(".teamName");
+    name.textContent = Name;
+    let score = el.querySelector(".teamTotalScore");
+    score.textContent = "0"; // TODO calcoolate
+}
+// End Teams
+
+let { Users, Teams } = await getDB()
 Users.forEach((user) => {
     console.log(user);
     makeScoreRow(user)
 });
 
+Teams.forEach((team) => {
+    console.log(team);
+    makeTeamRow(team);
+});
 // Useful for testing
 const bumpUserScore = () => {
     let usr = Users[0];

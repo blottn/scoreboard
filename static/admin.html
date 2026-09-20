@@ -1,0 +1,21 @@
+<head>
+    <title>scoreboard admin</title>
+    <link rel="stylesheet" href="./index.css"></link>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Player Name</th>
+            <th>Player Team</th>
+            <th>Player Score</th>
+        </tr>
+        <template id="player">
+            <tr>
+                <td class="name">name</td>
+                <td class="team">team</td>
+                <td class="score" contenteditable="true" onkeydown="editScore(event)" onblur="saveScore(event)">75</td>
+            </tr>
+        </template>
+    </table>
+    <script type="module" src="admin.mjs" async></script>
+</body>
