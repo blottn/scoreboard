@@ -93,6 +93,7 @@ func UpdateDB(r *http.Request) error {
 	if err != nil {
 		return err
 	}
+	slog.Info(fmt.Sprintf("update: %v", update))
 	for _, user := range update.Users {
 		for i, dbUser := range db.DB.Users {
 			if user.ID == dbUser.ID {
