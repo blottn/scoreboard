@@ -1,15 +1,7 @@
-import { getDB, updateDB } from "./util.mjs";
+import { getDB, updateDB, sendDB } from "./util.mjs";
 
+await updateDB();
 let { Users, Teams } = await getDB();
-const updateFromDB = async () => {
-    let newdb = await getDB();
-    Users = newdb.Users;
-    Teams = newdb.Teams;
-
-    setTimeout(updateFromDB, 500)
-}
-await updateFromDB();
-
 
 let playersTbl = document.querySelector("table");
 let playerTmpl = document.querySelector("template#player");
@@ -17,6 +9,7 @@ console.log(playerTmpl);
 
 // Sync ensures the UI makes sense given the current db
 function sync() {
+    let { Users, Teams} = getDB(); 
     // Add/ update
     Users.forEach(({ID, Name, Team, Score}) => {
         let row = document.querySelector(`tr[id="${ID}"]`);
@@ -35,12 +28,11 @@ function sync() {
     playersTbl.querySelectorAll("tr").forEach((row) => {
         console.log(row.id);
     });
+    setTimeout(500, sync)
 }
-
 sync();
 
 window.editScore = function(event) {
-    console.log(event.srcElement.parentElement);
     if (event.key === "Enter") {
         event.preventDefault();
         event.target.blur();
@@ -48,7 +40,6 @@ window.editScore = function(event) {
 }
 
 window.saveScore = function(event) {
-    console.log(event);
     let id = event.srcElement.parentElement.id
     let newScore = event.srcElement.textContent;
     setPlayerScore(id, newScore);
@@ -56,10 +47,11 @@ window.saveScore = function(event) {
 }
 
 function setPlayerScore(playerId, score) {
+    let { Users, ...db} = getDB();
     let idx = Users.findIndex(({ID}) => `${ID}` === playerId);
     if (idx === undefined) {
         return
     }
     Users[idx].Score = parseInt(score);
-    updateDB({Users, Teams});
+    sendDB({Users, ...db});
 }

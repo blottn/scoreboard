@@ -1,4 +1,5 @@
-import { getDB } from "./util.mjs";
+import { getDB, updateDB } from "./util.mjs";
+await updateDB();
 
 let { Users, Teams } = await getDB()
 

@@ -1,17 +1,13 @@
-let db = null;
-export const getDB = async () => {
-    if (db != null) { // Updates are running already
-        return db;
-    }
-    let resp = await fetch("/db")
+export let db = null;
+export const getDB = () => db;
+export const updateDB = async () => {
+    const resp = await fetch("/db");
     db = await resp.json();
     console.log(`current db:`,  db);
-    setTimeout(getDB, 500) // Every 500 ms refresh the DB
-    return db;
+    setTimeout(updateDB, 500) // Every 500 ms refresh the DB
 }
 
-
-export const updateDB = async (db) => {
+export const sendDB = async (db) => {
     let resp = await fetch("/db", {
         method: "PUT",
         body: JSON.stringify(db),
