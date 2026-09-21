@@ -64,10 +64,10 @@ Teams.forEach((team) => {
     makeTeamRow(team);
 });
 // Useful for testing
-const bumpUserScore = () => {
+/*const bumpUserScore = () => {
     let usr = Users[0];
     usr.Score += 1;
     updateScoreRow(usr);
     setTimeout(bumpUserScore, 750)
 }
-bumpUserScore();
+bumpUserScore();*/

@@ -3,19 +3,30 @@
     <link rel="stylesheet" href="./index.css"></link>
 </head>
 <body>
-    <table>
-        <tr>
-            <th>Player Name</th>
-            <th>Player Team</th>
-            <th>Player Score</th>
-        </tr>
-        <template id="player">
-            <tr>
-                <td class="name">name</td>
-                <td class="team">team</td>
-                <td class="score" contenteditable="true" onkeydown="editScore(event)" onblur="saveScore(event)">75</td>
-            </tr>
-        </template>
-    </table>
+    <nav>
+        <div>
+            <a id="title" href="/">SCOREBOARD</a>
+            <a href="/admin.html">admin</a>
+        </div>
+        <p id="np">Now playing:<span id="playing">dev</span></p>
+    </nav>
+    <div id="mainView">
+        <div>
+            <table>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Player Team</th>
+                    <th>Player Score</th>
+                </tr>
+                <template id="player">
+                    <tr>
+                        <td class="name">name</td>
+                        <td class="team">team</td>
+                        <td class="score" contenteditable="true" onkeydown="editScore(event)" onblur="saveScore(event)">75</td>
+                    </tr>
+                </template>
+            </table>
+        </div>
+    </div>
     <script type="module" src="admin.mjs" async></script>
 </body>
