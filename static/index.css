@@ -23,6 +23,27 @@ nav {
     }
 }
 
+#pageBody {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+
+    & #selectPlayer {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        & > div {
+            border: 1px solid white;
+            border-radius: 2px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
 #mainView {
     margin: 0px auto;
     width: 70%;

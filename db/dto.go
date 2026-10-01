@@ -10,6 +10,7 @@ type User struct {
 	ID    int
 	Name  string
 	Team  string // FK team
+	Free  bool
 	Score float64
 }
 
@@ -21,10 +22,11 @@ func NewUser(name, team string) *User {
 		ID:    lastID,
 		Name:  name,
 		Team:  team,
+		Free:  true,
 		Score: 0.,
 	}
 	lastID += 1
-	DB.Users = append(DB.Users, usr)
+	DB.Users = append(DB.Users, &usr)
 	NewTeam(team, "yellow")
 	return &usr
 }
@@ -41,7 +43,7 @@ func NewTeam(name string, color string) *Team {
 		if team.Name == name {
 			slog.Info("found existing team, updating to match request")
 			team.Color = color
-			found = &team
+			found = team
 		}
 	}
 	if found != nil {
@@ -51,6 +53,6 @@ func NewTeam(name string, color string) *Team {
 		name, color,
 	}
 	slog.Info(fmt.Sprintf("created team: %s", name))
-	DB.Teams = append(DB.Teams, t)
+	DB.Teams = append(DB.Teams, &t)
 	return &t
 }

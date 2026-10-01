@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"log/slog"
 	"time"
 
@@ -31,31 +30,40 @@ func (l Lease) Expire() {
 func (l Lease) Watch() {
 	playerName, ok := db.GetName(l.PlayerID)
 	if !ok {
-		slog.Error(fmt.Sprintf("unknown player id: %d", l.PlayerID))
+		slog.Error("unknown player id", "player", l.PlayerID)
 		return
 	}
+
+	go func() {
+		<-l.Ctx.Done()
+		l.Ws.Close()
+	}()
+
 	for {
-		select { // Check fi we are done
-		case <-l.Ctx.Done():
-		default:
-		}
-		bs, err := io.ReadAll(l.Ws)
+		var msg string
+
+		err := websocket.Message.Receive(l.Ws, &msg)
 		if err != nil {
-			slog.Error(fmt.Sprintf("error reading from ws: %s", err.Error()), "player", playerName)
 			return
 		}
-		msg := string(bs)
-		slog.Debug(fmt.Sprintf("message from player %s", msg), "player", playerName)
+
 		l.LastSeen = time.Now()
+
+		slog.Debug("message from player",
+			"player", playerName,
+			"message", msg,
+		)
 	}
 }
 
 var Leases = []Lease{}
 
+// TakeLease brute force takes control of a player lease
 func TakeLease(ctx context.Context, playerId int, ws *websocket.Conn) {
 	for _, lease := range Leases {
 		if lease.PlayerID == playerId {
-			slog.Info(fmt.Sprintf("lease already held: %d", lease.PlayerID))
+			slog.Info(fmt.Sprintf("lease already held: %d, expiring", lease.PlayerID))
+			lease.Expire()
 		}
 	}
 	ctx, cancel := context.WithCancel(ctx)

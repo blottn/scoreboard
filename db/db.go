@@ -17,14 +17,14 @@ var (
 )
 
 type Database struct {
-	Users      []User
-	Teams      []Team
+	Users      []*User
+	Teams      []*Team
 	NowPlaying string
 }
 
 var DB = Database{
-	Users:      []User{},
-	Teams:      []Team{},
+	Users:      []*User{},
+	Teams:      []*Team{},
 	NowPlaying: "dev",
 }
 

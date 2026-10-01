@@ -1,6 +1,7 @@
 <head>
     <title>scoreboard</title>
     <link rel="stylesheet" href="./index.css"></link>
+    <script async src="./index.mjs" type="module"></script>
 </head>
 <body>
     <nav>
@@ -10,39 +11,49 @@
         </div>
         <p id="np">Now playing:<span id="playing">dev</span></p>
     </nav>
-    <div id="mainView">
-        <div id="scores">
-            <table>
-                <tr>
-                    <th>Player Name</th>
-                    <th>Player Team</th>
-                    <th>Player Score</th>
-                </tr>
-                <tbody>
-                    <template>
-                        <tr>
-                            <td class="name">name</td>
-                            <td class="team">team</td>
-                            <td class="score">score</td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+    <div id="pageBody">
+        <div id="selectPlayer">
+            <template id="playerOption">
+                
+                <div onclick="becomePlayer(event)">
+                    <div class="mytest"></div>
+                    <p class="name"></p>
+                </div>
+            </template>
+            <script async type="module" src="./player.mjs"></script>
         </div>
-        <div id="teams">
-            <table>
-                <tbody>
-                    <template>
-                        <tr>
-                            <td class="teamName"></td>
-                            <td class="teamTotalScore"></td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+        <div id="mainView">
+            <div id="scores">
+                <table>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Player Team</th>
+                        <th>Player Score</th>
+                    </tr>
+                    <tbody>
+                        <template>
+                            <tr>
+                                <td class="name">name</td>
+                                <td class="team">team</td>
+                                <td class="score">score</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div id="teams">
+                <table>
+                    <tbody>
+                        <template>
+                            <tr>
+                                <td class="teamName"></td>
+                                <td class="teamTotalScore"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <div id="selectPlayer"></div>
-    <script async src="./index.mjs" type="module"></script>
 </body>
 

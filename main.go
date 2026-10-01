@@ -50,11 +50,11 @@ func run() error {
 			w.Write([]byte("error"))
 		}
 	})
-	http.Handle("/ws", &websocket.Server{
+	http.Handle("/ws/{player}", &websocket.Server{
 		Handler: func(c *websocket.Conn) {
 			defer c.Close()
 			req := c.Request()
-			player := req.Header.Get("player")
+			player := req.PathValue("player")
 			if player == "" {
 				slog.Error("player header was not set")
 				return
@@ -64,8 +64,33 @@ func run() error {
 				slog.Error(fmt.Sprintf("parse playerId: %s", err.Error()))
 				return
 			}
-			leases.TakeLease(ctx, playerId, c)
+			for _, usr := range db.DB.Users {
+				if usr.ID == playerId {
+					if usr.Free {
+						usr.Free = false
+						slog.Info("taking lease", "player", usr.Name)
+						leases.TakeLease(ctx, playerId, c)
+						slog.Info("releasing", "player", usr.Name)
+						usr.Free = true
+					} else {
+						fmt.Fprintln(c, "Lease already taken for player")
+						c.Close()
+					}
+				}
+			}
 		},
+	})
+	http.HandleFunc("/leases/free", func(w http.ResponseWriter, r *http.Request) {
+		free := []int{}
+		for _, usr := range db.DB.Users {
+			if usr.Free {
+				free = append(free, usr.ID)
+			}
+		}
+		err := json.NewEncoder(w).Encode(free)
+		if err != nil {
+			slog.Error(err.Error())
+		}
 	})
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
@@ -83,6 +108,7 @@ func run() error {
 
 func FetchDB(w http.ResponseWriter) error {
 	slog.Info("get DB")
+
 	return json.NewEncoder(w).Encode(db.DB)
 }
 

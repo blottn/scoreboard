@@ -1,5 +1,4 @@
-import { getDB, updateDB } from "./db.mjs";
-await updateDB();
+import { getDB } from "./db.mjs";
 
 let { Users, Teams } = await getDB()
 
@@ -28,7 +27,6 @@ const updateScoreRow = ({ID, Name, Team, Score}) => {
     let score = el.querySelector(".score");
     score.textContent = Score;
 }
-
 // End scoreboard
 
 
