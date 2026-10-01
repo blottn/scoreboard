@@ -7,11 +7,11 @@ import (
 )
 
 type User struct {
-	ID    int
-	Name  string
-	Team  string // FK team
-	Free  bool
-	Score float64
+	ID      int
+	Name    string
+	Team    string // FK team
+	Claimer string
+	Score   float64
 }
 
 var lastID = 0
@@ -19,11 +19,11 @@ var lastID = 0
 func NewUser(name, team string) *User {
 	slog.Info(fmt.Sprintf("new user: %s on %s", name, team))
 	usr := User{
-		ID:    lastID,
-		Name:  name,
-		Team:  team,
-		Free:  true,
-		Score: 0.,
+		ID:      lastID,
+		Name:    name,
+		Team:    team,
+		Claimer: "",
+		Score:   0.,
 	}
 	lastID += 1
 	DB.Users = append(DB.Users, &usr)

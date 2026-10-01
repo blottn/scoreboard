@@ -3,6 +3,6 @@
 const idKey = "score-agent-id";
 
 if (localStorage.getItem(idKey) == null) {
-    localStorage.setItem(idKey, uuidv4());
+    localStorage.setItem(idKey, crypto.randomUUID());
 }
-export const id = localStorage.getItem(idKey);
+export const agentId = localStorage.getItem(idKey);

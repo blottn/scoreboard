@@ -3,12 +3,14 @@
 
 import { getDB, sendDB } from "./db.mjs";
 
+import { agentId } from "./uid.mjs";
+
 let playerSelect = document.querySelector("#selectPlayer");
 let playerSelectTmpl = document.querySelector("#playerOption");
 
 async function sync() {
     let { Users, ...db } = await getDB();
-    Users.filter(({Free}) => Free).forEach(({ID, Name, Free}) => {
+    Users.filter(({Claimer}) => Claimer === "").forEach(({ID, Name}) => {
         let player = playerSelect.querySelector(`[id="${ID}"]`);
         if (player == null) {
             player = document.importNode(playerSelectTmpl.content, true);
@@ -19,8 +21,8 @@ async function sync() {
         player.querySelector(".name").textContent = Name;
     });
     playerSelect.querySelectorAll(":scope > div").forEach((row) => {
-        Users.forEach(({ID, Free}) => {
-            if (`${ID}` === row.id && Free == false) {
+        Users.forEach(({ID, Claimer}) => {
+            if (`${ID}` === row.id && Claimer !== "") {
                 row.parentElement.removeChild(row);
             }
         })
@@ -29,20 +31,12 @@ async function sync() {
 }
 sync();
 
-
-const takeLease = (id) => {
-    let ws = new WebSocket(`/ws/${id}`);
-    ws.addEventListener("connect", () => {
-    const tick = () => {
-            ws.send(`tick: ${id}`)
-            setTimeout(tick, 100);
-        }
-        tick();
-    });
+const claimPlayer = async (playerId) => {
+    await fetch(`/claim/${playerId}?owner=${agentId}`);
 }
 
 window.becomePlayer = function(event) {
     // TODO sometimes this hits the p block instead of the div
-    takeLease(event.target.id);
+    claimPlayer(event.target.id);
     console.log(event.target.id);
 }

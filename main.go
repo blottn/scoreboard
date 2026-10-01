@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/blottn/scoreboard/db"
 	"github.com/blottn/scoreboard/leases"
-	"golang.org/x/net/websocket"
 )
 
 func main() {
@@ -25,8 +23,6 @@ func main() {
 var listenAddr = flag.String("listen-addr", ":5352", "Where the http server listens")
 
 func run() error {
-	ctx := context.Background()
-
 	go db.Start()
 	go func() {
 		for {
@@ -50,7 +46,33 @@ func run() error {
 			w.Write([]byte("error"))
 		}
 	})
-	http.Handle("/ws/{player}", &websocket.Server{
+	http.HandleFunc("/claim/{player}", func(w http.ResponseWriter, r *http.Request) {
+		toClaim, err := strconv.Atoi(r.PathValue("player"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, err.Error())
+			slog.Error("failed to claim", "err", err.Error())
+			return
+		}
+		claimer := r.URL.Query().Get("owner")
+
+		claimed := false
+		for _, usr := range db.DB.Users {
+			if usr.ID == toClaim && usr.Claimer == "" {
+				usr.Claimer = claimer
+				claimed = true
+			}
+		}
+		if !claimed {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "tried to claim non existent usr")
+			slog.Error("tried to claim non existent usr", "player", toClaim)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "claimed")
+	})
+	/*http.Handle("/ws/{player}", &websocket.Server{
 		Handler: func(c *websocket.Conn) {
 			defer c.Close()
 			req := c.Request()
@@ -91,7 +113,7 @@ func run() error {
 		if err != nil {
 			slog.Error(err.Error())
 		}
-	})
+	})*/
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
