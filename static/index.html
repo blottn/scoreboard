@@ -1,7 +1,10 @@
 <head>
     <title>scoreboard</title>
 
-    <link rel="stylesheet" href="./index.css">
+    <link
+        rel="stylesheet"
+        href="./index.css"
+    >
 
     <script
         async
@@ -14,16 +17,36 @@
         src="./announcement.mjs"
         type="module"
     ></script>
+
+    <script
+        async
+        src="./name.mjs"
+        type="module"
+    ></script>
 </head>
 
 <body>
-    <div id="winnerBanner">
-        <div id="winnerBannerText"></div>
+    <div
+        id="winnerBanner"
+        hidden
+    >
+        <div class="winnerText">
+            <span class="winnerName"></span>
+            <span>wins!</span>
+        </div>
+
+        <div class="winnerTimer">
+            <div class="winnerTimerBar"></div>
+        </div>
     </div>
+
 
     <nav>
         <div>
-            <a id="title" href="/">
+            <a
+                id="title"
+                href="/"
+            >
                 SCOREBOARD
             </a>
 
@@ -32,11 +55,31 @@
             </a>
         </div>
 
-        <p id="np">
-            Now playing:
-            <span id="playing">dev</span>
-        </p>
+
+        <div id="navStatus">
+            <p id="playerIdentity">
+                you:
+                <span id="myPlayerName">
+                    name
+                </span>
+
+                <input
+                    id="playerNameInput"
+                    type="text"
+                    maxlength="32"
+                    autocomplete="off"
+                    spellcheck="false"
+                    hidden
+                >
+            </p>
+
+            <p id="np">
+                Now playing:
+                <span id="playing">dev</span>
+            </p>
+        </div>
     </nav>
+
 
     <div id="pageBody">
         <div id="selectPlayer">
@@ -54,6 +97,7 @@
                 src="./player.mjs"
             ></script>
         </div>
+
 
         <div id="mainView">
             <div id="scores">
@@ -86,13 +130,13 @@
                 </table>
             </div>
 
+
             <div id="teams">
                 <table>
                     <tbody>
                         <template>
                             <tr>
                                 <td class="teamName"></td>
-
                                 <td class="teamTotalScore"></td>
                             </tr>
                         </template>

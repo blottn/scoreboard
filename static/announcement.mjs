@@ -1,12 +1,3 @@
-const banner =
-    document.querySelector("#winnerBanner");
-
-const bannerText =
-    document.querySelector(
-        "#winnerBannerText"
-    );
-
-
 /* ==================================================
    WebSocket
    ================================================== */
@@ -50,13 +41,26 @@ const connectWebSocket = () => {
             }
 
             if (
-                message.type === "winner"
+                message.type !== "winner"
             ) {
-                showWinner(
-                    message.name,
-                    message.color
-                );
+                return;
             }
+
+            /*
+             * index.mjs owns the banner itself,
+             * including the timer and dismissal.
+             */
+            window.dispatchEvent(
+                new CustomEvent(
+                    "winnerAnnouncement",
+                    {
+                        detail: {
+                            name: message.name,
+                            color: message.color
+                        }
+                    }
+                )
+            );
         }
     );
 
@@ -85,33 +89,6 @@ const connectWebSocket = () => {
     );
 };
 
+
 connectWebSocket();
 
-
-/* ==================================================
-   Winner banner
-   ================================================== */
-
-const showWinner = (
-    name,
-    color
-) => {
-    bannerText.textContent =
-        `WINNER — ${name}`;
-
-    banner.style.setProperty(
-        "--winner-color",
-        color || "#ffffff"
-    );
-
-    banner.classList.remove(
-        "visible"
-    );
-
-    // Force the animation to restart
-    void banner.offsetWidth;
-
-    banner.classList.add(
-        "visible"
-    );
-};

@@ -1,7 +1,7 @@
 :root {
     color-scheme: dark;
 
-    --bg: #0b0b0d;
+    --bg: #080809;
     --surface: #141417;
     --surface-hover: #1c1c21;
     --border: #303038;
@@ -20,6 +20,11 @@
         sans-serif;
 }
 
+
+/* ==================================================
+   Global
+   ================================================== */
+
 * {
     box-sizing: border-box;
 }
@@ -31,9 +36,40 @@ body {
 }
 
 body {
-    background: var(--bg);
+    background-color: var(--bg);
     color: var(--text);
     font-size: 16px;
+
+    /*
+     * Subtle geometric texture.
+     *
+     * The background remains almost entirely black.
+     * The triangles are intentionally very dark and
+     * widely spaced so they don't compete with the UI.
+     */
+    background-image:
+        linear-gradient(
+            135deg,
+            transparent 0 49.5%,
+            rgba(255, 255, 255, 0.018) 50%,
+            transparent 50.5%
+        ),
+        linear-gradient(
+            315deg,
+            transparent 0 49.5%,
+            rgba(255, 255, 255, 0.014) 50%,
+            transparent 50.5%
+        );
+
+    background-size:
+        260px 260px,
+        340px 340px;
+
+    background-position:
+        30px 70px,
+        170px 210px;
+
+    background-attachment: fixed;
 }
 
 a {
@@ -59,6 +95,11 @@ nav {
     justify-content: space-between;
 
     border-bottom: 1px solid var(--border);
+
+    background:
+        rgba(8, 8, 9, 0.88);
+
+    backdrop-filter: blur(8px);
 }
 
 nav > div:first-child {
@@ -87,92 +128,40 @@ nav > div:first-child > a:not(#title):hover {
    Player identity
    ================================================== */
 
+#playerIdentity {
+    margin: 0 32px 0 auto;
+
+    color: var(--muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
 #playerName {
-    margin-left: auto;
-    margin-right: 32px;
-    min-width: 180px;
+    width: 120px;
+    min-height: 28px;
 
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
+    margin-left: 4px;
+    padding: 3px 7px;
 
-#playerNameLabel {
-    position: relative;
+    display: inline-block;
 
-    padding: 6px 10px 7px;
+    border: 1px solid #555;
+    border-radius: 4px;
 
-    color: var(--text);
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-
-    border-bottom: 2px solid var(--border);
-
-    cursor: pointer;
-
-    transition:
-        color 100ms ease,
-        border-color 100ms ease;
-}
-
-#playerNameLabel:hover {
-    color: white;
-    border-bottom-color: #888;
-}
-
-#playerNameLabel::before {
-    content: "PLAYER";
-
-    display: block;
-
-    margin-bottom: 2px;
-
-    color: var(--muted);
-    font-size: 0.55rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-}
-
-#playerNameLabel::after {
-    content: "↗";
-
-    margin-left: 7px;
-
-    color: var(--muted);
-    font-size: 0.7rem;
-
-    opacity: 0;
-    transition: opacity 100ms ease;
-}
-
-#playerNameLabel:hover::after {
-    opacity: 1;
-}
-
-#playerName:not(.has-player) #playerNameLabel {
-    color: var(--muted);
-    font-weight: 400;
-    cursor: default;
-}
-
-#playerNameInput {
-    width: 180px;
-
-    padding: 7px 10px;
-
-    background: var(--surface);
-    color: var(--text);
-
-    border: 0;
-    border-bottom: 2px solid white;
-    border-radius: 0;
-
-    font: inherit;
-    font-size: 0.82rem;
-    font-weight: 700;
+    background: #111;
+    color: #fff;
 
     outline: none;
+
+    font: inherit;
+    font-weight: 700;
+
+    cursor: text;
+}
+
+#playerName:focus {
+    border-color: #888;
+    background: #161619;
 }
 
 
@@ -180,8 +169,17 @@ nav > div:first-child > a:not(#title):hover {
    Now playing
    ================================================== */
 
-#np {
+#navStatus {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+#navStatus p {
     margin: 0;
+}
+
+#np {
     padding-left: 20px;
 
     border-left: 1px solid var(--border);
@@ -222,12 +220,33 @@ nav > div:first-child > a:not(#title):hover {
 
 
 /* ==================================================
+   Public scoreboard layout
+   ================================================== */
+
+#pageBody {
+    width: min(1400px, calc(100% - 48px));
+    margin: 40px auto;
+
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 24px;
+}
+
+#pageBody #mainView {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+
+/* ==================================================
    Tables
    ================================================== */
 
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;
 }
 
 th {
@@ -260,10 +279,44 @@ tbody tr:hover {
 
 
 /* ==================================================
-   Score display
+   Player score table
    ================================================== */
 
-.score {
+#scores {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+#scores table {
+    width: 100%;
+}
+
+#scores tbody tr {
+    /*
+     * The JavaScript supplies --team-color.
+     *
+     * Only a very small amount of the team color
+     * is mixed into the background.
+     */
+    background:
+        color-mix(
+            in srgb,
+            var(--team-color, #ffffff) 5%,
+            var(--surface)
+        );
+}
+
+#scores tbody tr:hover {
+    background:
+        color-mix(
+            in srgb,
+            var(--team-color, #ffffff) 9%,
+            var(--surface-hover)
+        );
+}
+
+#scores .score {
     width: 120px;
 
     text-align: right;
@@ -271,101 +324,39 @@ tbody tr:hover {
     font-weight: 700;
 }
 
-[contenteditable="true"] {
-    cursor: text;
-    outline: none;
-}
-
-[contenteditable="true"]:focus {
-    background: #25252b;
-    box-shadow: inset 0 0 0 1px #66666f;
-}
-
 
 /* ==================================================
-   Admin assignments
+   Team colors
    ================================================== */
 
-#assigns {
-    padding: 16px;
+#teams {
+    overflow: hidden;
 }
 
-.assignee {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    align-items: center;
-    gap: 16px;
+#teams tbody tr {
+    border-left: 5px solid var(--team-color);
 
-    padding: 14px 16px;
-
-    background: #101013;
-    border: 1px solid var(--border);
-    border-radius: 7px;
+    background:
+        color-mix(
+            in srgb,
+            var(--team-color) 10%,
+            var(--surface)
+        );
 }
 
-.assignee + .assignee {
-    margin-top: 8px;
+#teams .teamName {
+    color: var(--team-color);
+    font-weight: 700;
 }
 
-.assignee p {
-    margin: 0;
+#teams .teamTotalScore {
+    color: var(--team-color);
+    font-weight: 800;
 }
 
-.assignee .name {
-    font-weight: 600;
-}
-
-.assignee .owner {
-    color: var(--muted);
-    font-size: 0.9rem;
-}
-
-
-/* ==================================================
-   Buttons
-   ================================================== */
-
-button {
-    padding: 7px 12px;
-
-    background: transparent;
-    color: var(--text);
-
-    border: 1px solid var(--border);
-    border-radius: 6px;
-
-    font: inherit;
-    font-size: 0.8rem;
-
-    cursor: pointer;
-}
-
-button:hover {
-    background: var(--surface-hover);
-    border-color: #50505a;
-}
-
-button:active {
-    background: #25252b;
-}
-
-
-/* ==================================================
-   Public scoreboard layout
-   ================================================== */
-
-#pageBody {
-    width: min(1400px, calc(100% - 48px));
-    margin: 40px auto;
-
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    gap: 24px;
-}
-
-#pageBody #mainView {
-    width: 100%;
-    margin: 0;
+#teams td {
+    padding-top: 14px;
+    padding-bottom: 14px;
 }
 
 
@@ -453,148 +444,91 @@ button:active {
 
 
 /* ==================================================
-   Public scoreboard
+   Contenteditable
    ================================================== */
 
-#scores,
-#teams {
-    overflow: hidden;
+[contenteditable="true"] {
+    cursor: text;
+    outline: none;
 }
 
-#scores .score,
-#teams .teamTotalScore {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
+[contenteditable="true"]:focus {
+    background: #25252b;
+    box-shadow: inset 0 0 0 1px #66666f;
 }
 
 
 /* ==================================================
-   Team colors
+   Admin assignments
    ================================================== */
 
-#teams tbody tr {
-    border-left: 5px solid var(--team-color);
-
-    background: color-mix(
-        in srgb,
-        var(--team-color) 10%,
-        var(--surface)
-    );
+#assigns {
+    padding: 16px;
 }
 
-#teams .teamName {
-    color: var(--team-color);
-    font-weight: 700;
+.assignee {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
+    gap: 16px;
+
+    padding: 14px 16px;
+
+    background: #101013;
+    border: 1px solid var(--border);
+    border-radius: 7px;
 }
 
-#teams .teamTotalScore {
-    color: var(--team-color);
-    font-weight: 800;
+.assignee + .assignee {
+    margin-top: 8px;
 }
 
-#teams td {
-    padding-top: 14px;
-    padding-bottom: 14px;
+.assignee p {
+    margin: 0;
+}
+
+.assignee .name {
+    font-weight: 600;
+}
+
+.assignee .owner {
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
 
 /* ==================================================
-   Responsive
+   Buttons
    ================================================== */
 
-@media (max-width: 800px) {
-    nav {
-        padding: 0 20px;
-    }
+button {
+    padding: 7px 12px;
 
-    #playerName {
-        margin-right: 16px;
-        min-width: 0;
-    }
-
-    #playerNameLabel {
-        padding-left: 6px;
-        padding-right: 6px;
-    }
-
-    #playerNameLabel::before {
-        display: none;
-    }
-
-    #np {
-        display: none;
-    }
-
-    #pageBody {
-        width: min(100% - 24px, 700px);
-        margin: 24px auto;
-
-        grid-template-columns: 1fr;
-    }
-
-    #selectPlayer {
-        order: -1;
-    }
-
-    #mainView {
-        width: min(100% - 24px, 700px);
-        margin: 24px auto;
-    }
-}
-
-@media (max-width: 500px) {
-    th,
-    td {
-        padding: 12px 10px;
-    }
-
-    th {
-        font-size: 0.65rem;
-    }
-
-    .assignee {
-        grid-template-columns: 1fr auto;
-    }
-
-    .assignee .owner {
-        grid-column: 1;
-    }
-
-    .assignee button {
-        grid-column: 2;
-        grid-row: 1 / 3;
-    }
-}
-
-#players {
-    overflow-x: auto;
-}
-
-.teamSelect {
-    min-width: 130px;
-    padding: 6px 9px;
-
-    background: var(--surface);
+    background: transparent;
     color: var(--text);
 
     border: 1px solid var(--border);
-    border-radius: 5px;
+    border-radius: 6px;
 
     font: inherit;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 
     cursor: pointer;
 }
 
-.teamSelect:hover {
+button:hover {
+    background: var(--surface-hover);
     border-color: #50505a;
 }
 
-.teamSelect:focus {
-    outline: none;
-    border-color: #777;
+button:active {
+    background: #25252b;
 }
+
+
+/* ==================================================
+   Team manager
+   ================================================== */
 
 #teamManager {
     padding: 20px;
@@ -658,6 +592,11 @@ button:active {
     border-color: var(--danger);
 }
 
+
+/* ==================================================
+   Team creation
+   ================================================== */
+
 #createTeam {
     margin-top: 16px;
 
@@ -694,86 +633,6 @@ button:active {
     border-radius: 6px;
 
     cursor: pointer;
-}
-
-@media (max-width: 600px) {
-    #createTeam {
-        display: grid;
-        grid-template-columns: 1fr 40px;
-    }
-
-    #createTeam button {
-        grid-column: 1 / -1;
-    }
-}
-
-
-#winnerBanner {
-    --winner-color: #ffffff;
-
-    position: fixed;
-    z-index: 1000;
-
-    top: 50%;
-    left: 50%;
-
-    width: 160vw;
-
-    padding: 18px 0;
-
-    background: var(--winner-color);
-    color: #000;
-
-    text-align: center;
-
-    font-size: clamp(
-        2rem,
-        5vw,
-        5rem
-    );
-
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-
-    pointer-events: none;
-
-    transform:
-        translate(-50%, -50%)
-        rotate(-12deg)
-        scale(0);
-
-    opacity: 0;
-
-    box-shadow:
-        0 0 40px
-        color-mix(
-            in srgb,
-            var(--winner-color),
-            transparent 45%
-        );
-
-    transition:
-        transform 350ms cubic-bezier(
-            0.16,
-            1,
-            0.3,
-            1
-        ),
-        opacity 200ms ease;
-}
-
-#winnerBanner.visible {
-    opacity: 1;
-
-    transform:
-        translate(-50%, -50%)
-        rotate(-12deg)
-        scale(1);
-}
-
-#winnerBannerText {
-    white-space: nowrap;
 }
 
 
@@ -834,7 +693,170 @@ button:active {
     filter: brightness(0.9);
 }
 
+
+/* ==================================================
+   Winner banner
+   ================================================== */
+
+#winnerBanner {
+    --winner-color: #ffffff;
+
+    position: fixed;
+    z-index: 1000;
+
+    top: 42%;
+    left: -10%;
+
+    width: 120%;
+
+    background: var(--winner-color);
+    color: #000;
+
+    text-align: center;
+
+    font-size: 3.5rem;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    transform:
+        rotate(-8deg)
+        translateY(-80px);
+
+    opacity: 0;
+
+    cursor: pointer;
+    pointer-events: none;
+
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4);
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+#winnerBanner.visible {
+    opacity: 1;
+
+    transform:
+        rotate(-8deg)
+        translateY(0);
+
+    pointer-events: auto;
+}
+
+
+/* ==================================================
+   Winner text
+   ================================================== */
+
+.winnerText {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.3em;
+
+    padding: 18px 0 14px;
+}
+
+
+/* ==================================================
+   Winner timer
+   ================================================== */
+
+.winnerTimer {
+    width: 100%;
+    height: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    margin-bottom: 2px;
+
+    z-index: 2;
+}
+
+.winnerTimerBar {
+    width: 50%;
+    height: 8px;
+
+    background: #000;
+
+    border-radius: 999px;
+
+    transform: scaleX(1);
+    transform-origin: center center;
+
+    will-change: transform;
+
+    transition: none;
+}
+
+
+/* ==================================================
+   Winner hover
+   ================================================== */
+
+#winnerBanner.visible:hover {
+    transform:
+        rotate(-8deg)
+        translateY(0)
+        scale(1.025);
+}
+
+
+/* ==================================================
+   Responsive
+   ================================================== */
+
+@media (max-width: 800px) {
+    nav {
+        padding: 0 20px;
+    }
+
+    #playerIdentity {
+        margin-right: 16px;
+    }
+
+    #np {
+        display: none;
+    }
+
+    #pageBody {
+        width: min(100% - 24px, 700px);
+        margin: 24px auto;
+
+        grid-template-columns: 1fr;
+    }
+
+    #selectPlayer {
+        order: -1;
+    }
+
+    #mainView {
+        width: min(100% - 24px, 700px);
+        margin: 24px auto;
+    }
+}
+
+
 @media (max-width: 600px) {
+    #createTeam {
+        display: grid;
+        grid-template-columns: 1fr 40px;
+    }
+
+    #createTeam button {
+        grid-column: 1 / -1;
+    }
+
     #winnerControls {
         align-items: stretch;
         flex-direction: column;
@@ -845,39 +867,35 @@ button:active {
     }
 }
 
-#winnerBanner {
-    position: fixed;
-    top: 45%;
-    left: -10%;
-    width: 120%;
-    padding: 24px 0;
 
-    background: var(--winner-color, white);
-    color: black;
+@media (max-width: 500px) {
+    th,
+    td {
+        padding: 12px 10px;
+    }
 
-    text-align: center;
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    th {
+        font-size: 0.65rem;
+    }
 
-    transform: rotate(-8deg) translateY(-100px);
-    opacity: 0;
+    .assignee {
+        grid-template-columns: 1fr auto;
+    }
 
-    cursor: pointer;
-    pointer-events: none;
+    .assignee .owner {
+        grid-column: 1;
+    }
 
-    z-index: 1000;
+    .assignee button {
+        grid-column: 2;
+        grid-row: 1 / 3;
+    }
 
-    transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
+    #playerIdentity {
+        font-size: 0.72rem;
+    }
+
+    #playerName {
+        width: 100px;
+    }
 }
-
-#winnerBanner.visible {
-    opacity: 1;
-    transform: rotate(-8deg) translateY(0);
-    pointer-events: auto;
-}
-
-

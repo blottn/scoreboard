@@ -137,6 +137,28 @@ const syncScores = (Users) => {
             row.querySelector(
                 ".score"
             ).textContent = Score;
+
+            /*
+             * Store the player's team color on the row.
+             *
+             * The CSS uses this value to give the player
+             * row a subtle tint matching their team.
+             */
+            const team =
+                getDB()?.Teams?.find(
+                    ({ Name: teamName }) =>
+                        teamName === Team
+                );
+
+            row.style.setProperty(
+                "--team-color",
+                team?.Color || "#ffffff"
+            );
+
+            row.classList.toggle(
+                "has-team",
+                Boolean(Team)
+            );
         }
     );
 
@@ -237,7 +259,7 @@ const syncTeams = (
 
 
 /* ==================================================
-   DB sync
+   DB synchronization
    ================================================== */
 
 const sync = ({
@@ -260,12 +282,32 @@ onDBUpdate(sync);
    ================================================== */
 
 const winnerBanner =
-    document.querySelector("#winnerBanner");
+    document.querySelector(
+        "#winnerBanner"
+    );
+
+const winnerName =
+    document.querySelector(
+        "#winnerBanner .winnerName"
+    );
+
+const winnerTimerBar =
+    document.querySelector(
+        "#winnerBanner .winnerTimerBar"
+    );
+
+const WINNER_DURATION =
+    30 * 1000;
 
 let winnerTimeout = null;
+let winnerAnimation = null;
 
 
-const hideWinnerBanner = () => {
+/* --------------------------------------------------
+   Stop timer
+   -------------------------------------------------- */
+
+const stopWinnerTimer = () => {
     if (winnerTimeout !== null) {
         clearTimeout(
             winnerTimeout
@@ -273,6 +315,23 @@ const hideWinnerBanner = () => {
 
         winnerTimeout = null;
     }
+
+    if (winnerAnimation !== null) {
+        cancelAnimationFrame(
+            winnerAnimation
+        );
+
+        winnerAnimation = null;
+    }
+};
+
+
+/* --------------------------------------------------
+   Hide banner
+   -------------------------------------------------- */
+
+const hideWinnerBanner = () => {
+    stopWinnerTimer();
 
     if (winnerBanner == null) {
         return;
@@ -282,10 +341,6 @@ const hideWinnerBanner = () => {
         "visible"
     );
 
-    /*
-     * Remove the banner from the layout after
-     * the transition has finished.
-     */
     setTimeout(() => {
         if (
             !winnerBanner.classList.contains(
@@ -298,6 +353,64 @@ const hideWinnerBanner = () => {
 };
 
 
+/* --------------------------------------------------
+   Timer
+   -------------------------------------------------- */
+
+const startWinnerTimer = () => {
+    const startedAt =
+        performance.now();
+
+    const update = (now) => {
+        const elapsed =
+            now - startedAt;
+
+        const progress =
+            Math.min(
+                elapsed /
+                    WINNER_DURATION,
+                1
+            );
+
+        /*
+         * The bar starts full and drains
+         * towards the centre.
+         */
+        const remaining =
+            1 - progress;
+
+        if (winnerTimerBar != null) {
+            winnerTimerBar.style.transform =
+                `scaleX(${remaining})`;
+        }
+
+        if (progress < 1) {
+            winnerAnimation =
+                requestAnimationFrame(
+                    update
+                );
+        } else {
+            winnerAnimation = null;
+        }
+    };
+
+    winnerAnimation =
+        requestAnimationFrame(
+            update
+        );
+
+    winnerTimeout =
+        setTimeout(
+            hideWinnerBanner,
+            WINNER_DURATION
+        );
+};
+
+
+/* --------------------------------------------------
+   Show banner
+   -------------------------------------------------- */
+
 const showWinnerBanner = (
     name,
     color
@@ -306,141 +419,106 @@ const showWinnerBanner = (
         return;
     }
 
-    /*
-     * If another winner is currently displayed,
-     * cancel its existing timer.
-     */
-    if (winnerTimeout !== null) {
-        clearTimeout(
-            winnerTimeout
-        );
-    }
+    stopWinnerTimer();
 
-    winnerBanner.textContent = name;
+    if (winnerName != null) {
+        winnerName.textContent =
+            name;
+    }
 
     winnerBanner.style.setProperty(
         "--winner-color",
         color || "#ffffff"
     );
 
+    if (winnerTimerBar != null) {
+        winnerTimerBar.style.transform =
+            "scaleX(1)";
+    }
+
     winnerBanner.hidden = false;
 
-    /*
-     * Force the browser to notice the hidden ->
-     * visible transition.
-     */
     requestAnimationFrame(() => {
         winnerBanner.classList.add(
             "visible"
         );
     });
 
-    /*
-     * Automatically hide after one minute.
-     */
-    winnerTimeout = setTimeout(
-        () => {
-            hideWinnerBanner();
-        },
-        60 * 1000
-    );
+    startWinnerTimer();
 };
 
 
-/*
- * Clicking the banner dismisses it immediately.
- */
+/* --------------------------------------------------
+   Winner announcement event
+   --------------------------------------------------
+
+   announcement.mjs owns the WebSocket connection.
+
+   It dispatches "winnerAnnouncement" when the
+   server announces a winner.
+
+   Keeping the WebSocket in one module prevents
+   every scoreboard page from opening two separate
+   connections.
+   */
+
+window.addEventListener(
+    "winnerAnnouncement",
+    (event) => {
+        const {
+            name,
+            color
+        } = event.detail ?? {};
+
+        if (typeof name !== "string") {
+            return;
+        }
+
+        showWinnerBanner(
+            name,
+            color
+        );
+    }
+);
+
+
+/* --------------------------------------------------
+   Dismiss when clicking outside
+   -------------------------------------------------- */
+
+document.addEventListener(
+    "click",
+    (event) => {
+        if (
+            winnerBanner == null ||
+            winnerBanner.hidden ||
+            !winnerBanner.classList.contains(
+                "visible"
+            )
+        ) {
+            return;
+        }
+
+        if (
+            !winnerBanner.contains(
+                event.target
+            )
+        ) {
+            hideWinnerBanner();
+        }
+    }
+);
+
+
+/* --------------------------------------------------
+   Dismiss when clicking banner
+   -------------------------------------------------- */
+
 if (winnerBanner != null) {
     winnerBanner.addEventListener(
         "click",
-        hideWinnerBanner
-    );
-}
-
-
-/* ==================================================
-   WebSocket
-   ================================================== */
-
-let socket = null;
-
-
-const connectWebSocket = () => {
-    const protocol =
-        location.protocol === "https:"
-            ? "wss:"
-            : "ws:";
-
-    socket =
-        new WebSocket(
-            `${protocol}//${location.host}/ws`
-        );
-
-    socket.addEventListener(
-        "open",
         () => {
-            console.log(
-                "WebSocket connected"
-            );
-        }
-    );
-
-    socket.addEventListener(
-        "message",
-        (event) => {
-            let message;
-
-            try {
-                message =
-                    JSON.parse(
-                        event.data
-                    );
-            } catch (error) {
-                console.error(
-                    "Invalid WebSocket message:",
-                    event.data
-                );
-
-                return;
-            }
-
-            if (
-                message.type === "winner"
-            ) {
-                showWinnerBanner(
-                    message.name,
-                    message.color
-                );
-            }
-        }
-    );
-
-    socket.addEventListener(
-        "close",
-        () => {
-            console.log(
-                "WebSocket disconnected; reconnecting..."
-            );
-
-            setTimeout(
-                connectWebSocket,
-                1000
-            );
-        }
-    );
-
-    socket.addEventListener(
-        "error",
-        (error) => {
-            console.error(
-                "WebSocket error:",
-                error
-            );
+            hideWinnerBanner();
         }
     );
 };
-
-
-connectWebSocket();
-
-
