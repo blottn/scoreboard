@@ -4,19 +4,111 @@ import {
     onDBUpdate
 } from "./db.mjs";
 
-const playersTbl = document.querySelector("#players tbody");
-const playerTmpl = document.querySelector("#player");
 
-const teamsContainer = document.querySelector("#teams");
-const teamTmpl = document.querySelector("#team");
+/* ==================================================
+   Players
+   ================================================== */
 
-const createTeamForm = document.querySelector("#createTeam");
-const newTeamName = document.querySelector("#newTeamName");
-const newTeamColor = document.querySelector("#newTeamColor");
+const playersTbl =
+    document.querySelector("#players tbody");
+
+const playerTmpl =
+    document.querySelector("#player");
 
 
 /* ==================================================
-   Rendering
+   Teams
+   ================================================== */
+
+const teamsContainer =
+    document.querySelector("#teams");
+
+const teamTmpl =
+    document.querySelector("#team");
+
+const createTeamForm =
+    document.querySelector("#createTeam");
+
+const newTeamName =
+    document.querySelector("#newTeamName");
+
+const newTeamColor =
+    document.querySelector("#newTeamColor");
+
+
+/* ==================================================
+   Control panel
+   ================================================== */
+
+const winnerSelect =
+    document.querySelector("#winnerSelect");
+
+const announceWinnerButton =
+    document.querySelector("#announceWinner");
+
+
+/* ==================================================
+   WebSocket
+   ================================================== */
+
+let socket = null;
+
+const connectWebSocket = () => {
+    const protocol =
+        location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
+
+    socket = new WebSocket(
+        `${protocol}//${location.host}/ws`
+    );
+
+    socket.addEventListener("open", () => {
+        console.log("WebSocket connected");
+    });
+
+    socket.addEventListener("close", () => {
+        console.log(
+            "WebSocket disconnected; reconnecting..."
+        );
+
+        setTimeout(
+            connectWebSocket,
+            1000
+        );
+    });
+
+    socket.addEventListener("error", (error) => {
+        console.error(
+            "WebSocket error:",
+            error
+        );
+    });
+};
+
+connectWebSocket();
+
+
+const sendAnnouncement = (message) => {
+    if (
+        socket == null ||
+        socket.readyState !== WebSocket.OPEN
+    ) {
+        console.error(
+            "Cannot announce: WebSocket is not connected"
+        );
+
+        return;
+    }
+
+    socket.send(
+        JSON.stringify(message)
+    );
+};
+
+
+/* ==================================================
+   Player rendering
    ================================================== */
 
 const makeTeamOptions = (
@@ -26,7 +118,8 @@ const makeTeamOptions = (
 ) => {
     select.replaceChildren();
 
-    const noTeam = document.createElement("option");
+    const noTeam =
+        document.createElement("option");
 
     noTeam.value = "";
     noTeam.textContent = "No team";
@@ -34,7 +127,8 @@ const makeTeamOptions = (
     select.appendChild(noTeam);
 
     teams.forEach(({ Name }) => {
-        const option = document.createElement("option");
+        const option =
+            document.createElement("option");
 
         option.value = Name;
         option.textContent = Name;
@@ -42,25 +136,29 @@ const makeTeamOptions = (
         select.appendChild(option);
     });
 
-    select.value = selectedTeam ?? "";
+    select.value =
+        selectedTeam ?? "";
 };
+
 
 const makePlayerRow = (
     { ID, Name, Team, Score },
     Teams
 ) => {
-    const row = document.importNode(
-        playerTmpl.content,
-        true
-    ).firstElementChild;
+    const row =
+        document.importNode(
+            playerTmpl.content,
+            true
+        ).firstElementChild;
 
     row.id = ID;
 
-    row.querySelector(".name").textContent = Name;
+    row.querySelector(
+        ".name"
+    ).textContent = Name;
 
-    const teamSelect = row.querySelector(
-        ".teamSelect"
-    );
+    const teamSelect =
+        row.querySelector(".teamSelect");
 
     makeTeamOptions(
         teamSelect,
@@ -78,58 +176,86 @@ const makePlayerRow = (
         }
     );
 
-    row.querySelector(".score").textContent = Score;
+    row.querySelector(
+        ".score"
+    ).textContent = Score;
 
     playersTbl.appendChild(row);
 
     return row;
 };
 
-const syncPlayers = (Users, Teams) => {
-    Users.forEach(({ ID, Name, Team, Score }) => {
-        let row = playersTbl.querySelector(
-            `tr[id="${ID}"]`
-        );
 
-        if (row == null) {
-            row = makePlayerRow(
-                {
-                    ID,
-                    Name,
-                    Team,
-                    Score
-                },
-                Teams
-            );
+const syncPlayers = (
+    Users,
+    Teams
+) => {
+    Users.forEach(
+        ({ ID, Name, Team, Score }) => {
+            let row =
+                playersTbl.querySelector(
+                    `tr[id="${ID}"]`
+                );
+
+            if (row == null) {
+                row = makePlayerRow(
+                    {
+                        ID,
+                        Name,
+                        Team,
+                        Score
+                    },
+                    Teams
+                );
+            }
+
+            row.querySelector(
+                ".name"
+            ).textContent = Name;
+
+            const teamSelect =
+                row.querySelector(
+                    ".teamSelect"
+                );
+
+            /*
+             * Don't touch an actively-used select.
+             */
+            if (
+                document.activeElement !==
+                teamSelect
+            ) {
+                makeTeamOptions(
+                    teamSelect,
+                    Teams,
+                    Team
+                );
+            }
+
+            const score =
+                row.querySelector(".score");
+
+            /*
+             * Don't overwrite text while the
+             * administrator is editing it.
+             */
+            if (
+                document.activeElement !==
+                score
+            ) {
+                score.textContent = Score;
+            }
         }
-
-        row.querySelector(".name").textContent = Name;
-
-        const teamSelect = row.querySelector(
-            ".teamSelect"
-        );
-
-        if (document.activeElement !== teamSelect) {
-            makeTeamOptions(
-                teamSelect,
-                Teams,
-                Team
-            );
-        }
-
-        const score = row.querySelector(".score");
-
-        if (document.activeElement !== score) {
-            score.textContent = Score;
-        }
-    });
+    );
 
     playersTbl
         .querySelectorAll(":scope > tr")
         .forEach((row) => {
-            const exists = Users.some(
-                ({ ID }) => `${ID}` === row.id
-            );
+            const exists =
+                Users.some(
+                    ({ ID }) =>
+                        `${ID}` === row.id
+                );
 
             if (!exists) {
                 row.remove();
@@ -137,55 +263,78 @@ const syncPlayers = (Users, Teams) => {
         });
 };
 
+
+/* ==================================================
+   Team rendering
+   ================================================== */
+
 const syncTeams = (Teams) => {
-    Teams.forEach(({ Name, Color }) => {
-        let row = teamsContainer.querySelector(
-            `[data-team="${CSS.escape(Name)}"]`
-        );
+    Teams.forEach(
+        ({ Name, Color }) => {
+            let row =
+                teamsContainer.querySelector(
+                    `[data-team="${CSS.escape(Name)}"]`
+                );
 
-        if (row == null) {
-            row = document.importNode(
-                teamTmpl.content,
-                true
-            ).firstElementChild;
+            if (row == null) {
+                row =
+                    document.importNode(
+                        teamTmpl.content,
+                        true
+                    ).firstElementChild;
 
-            row.dataset.team = Name;
+                row.dataset.team = Name;
 
-            teamsContainer.appendChild(row);
+                teamsContainer.appendChild(
+                    row
+                );
 
-            const colorInput = row.querySelector(
-                ".teamColor"
-            );
-
-            colorInput.addEventListener(
-                "change",
-                async () => {
-                    await changeTeamColor(
-                        Name,
-                        colorInput.value
+                const colorInput =
+                    row.querySelector(
+                        ".teamColor"
                     );
-                }
-            );
+
+                colorInput.addEventListener(
+                    "change",
+                    async () => {
+                        await changeTeamColor(
+                            Name,
+                            colorInput.value
+                        );
+                    }
+                );
+            }
+
+            row.querySelector(
+                ".teamName"
+            ).textContent = Name;
+
+            const colorInput =
+                row.querySelector(
+                    ".teamColor"
+                );
+
+            /*
+             * Don't overwrite a color picker while
+             * the user is interacting with it.
+             */
+            if (
+                document.activeElement !==
+                colorInput
+            ) {
+                colorInput.value = Color;
+            }
         }
-
-        row.querySelector(".teamName").textContent = Name;
-
-        const colorInput = row.querySelector(
-            ".teamColor"
-        );
-
-        if (document.activeElement !== colorInput) {
-            colorInput.value = Color;
-        }
-    });
+    );
 
     teamsContainer
         .querySelectorAll(".teamAdmin")
         .forEach((row) => {
-            const exists = Teams.some(
-                ({ Name }) =>
-                    Name === row.dataset.team
-            );
+            const exists =
+                Teams.some(
+                    ({ Name }) =>
+                        Name === row.dataset.team
+                );
 
             if (!exists) {
                 row.remove();
@@ -193,16 +342,206 @@ const syncTeams = (Teams) => {
         });
 };
 
-const sync = ({ Users, Teams }) => {
-    syncPlayers(Users, Teams);
-    syncTeams(Teams);
+
+/* ==================================================
+   Winner selector
+   ================================================== */
+
+/*
+ * This changes only when the actual available
+ * winners change.
+ *
+ * A score update therefore does NOT rebuild the
+ * select and interrupt the user's interaction.
+ */
+let winnerOptionsKey = "";
+
+
+const getWinnerOptionsKey = (
+    Users,
+    Teams
+) => {
+    const players =
+        Users.map(
+            ({ ID, Name }) =>
+                `player:${ID}:${Name}`
+        );
+
+    const teams =
+        Teams.map(
+            ({ Name }) =>
+                `team:${Name}`
+        );
+
+    return [
+        ...players,
+        ...teams
+    ].join("|");
+};
+
+
+const syncWinnerSelector = (
+    Users,
+    Teams
+) => {
+    const newKey =
+        getWinnerOptionsKey(
+            Users,
+            Teams
+        );
+
+    /*
+     * Nothing about the available options
+     * changed, so leave the select completely
+     * untouched.
+     */
+    if (newKey === winnerOptionsKey) {
+        return;
+    }
+
+    winnerOptionsKey = newKey;
+
+    const currentValue =
+        winnerSelect.value;
+
+    winnerSelect.replaceChildren();
+
+
+    const placeholder =
+        document.createElement("option");
+
+    placeholder.value = "";
+    placeholder.textContent =
+        "Select a winner";
+
+    winnerSelect.appendChild(
+        placeholder
+    );
+
+
+    /*
+     * Players
+     */
+
+    if (Users.length > 0) {
+        const playersGroup =
+            document.createElement(
+                "optgroup"
+            );
+
+        playersGroup.label =
+            "Players";
+
+        Users.forEach(
+            ({ ID, Name }) => {
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    `player:${ID}`;
+
+                option.textContent =
+                    Name;
+
+                playersGroup.appendChild(
+                    option
+                );
+            }
+        );
+
+        winnerSelect.appendChild(
+            playersGroup
+        );
+    }
+
+
+    /*
+     * Teams
+     */
+
+    if (Teams.length > 0) {
+        const teamsGroup =
+            document.createElement(
+                "optgroup"
+            );
+
+        teamsGroup.label =
+            "Teams";
+
+        Teams.forEach(
+            ({ Name }) => {
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    `team:${Name}`;
+
+                option.textContent =
+                    Name;
+
+                teamsGroup.appendChild(
+                    option
+                );
+            }
+        );
+
+        winnerSelect.appendChild(
+            teamsGroup
+        );
+    }
+
+
+    /*
+     * Restore the previous selection if the
+     * selected winner still exists.
+     */
+    const stillExists =
+        Array.from(
+            winnerSelect.options
+        ).some(
+            ({ value }) =>
+                value === currentValue
+        );
+
+    if (stillExists) {
+        winnerSelect.value =
+            currentValue;
+    }
+};
+
+
+/* ==================================================
+   DB synchronization
+   ================================================== */
+
+const sync = ({
+    Users,
+    Teams
+}) => {
+    syncPlayers(
+        Users,
+        Teams
+    );
+
+    syncTeams(
+        Teams
+    );
+
+    syncWinnerSelector(
+        Users,
+        Teams
+    );
 };
 
 onDBUpdate(sync);
 
 
 /* ==================================================
-   Player score management
+   Score editing
    ================================================== */
 
 window.editScore = function(event) {
@@ -212,16 +551,23 @@ window.editScore = function(event) {
     }
 };
 
+
 window.saveScore = async function(event) {
-    const scoreElement = event.currentTarget;
-    const id = scoreElement.parentElement.id;
-    const text = scoreElement.textContent.trim();
+    const scoreElement =
+        event.currentTarget;
+
+    const id =
+        scoreElement.parentElement.id;
+
+    const text =
+        scoreElement.textContent.trim();
 
     if (text === "") {
         return;
     }
 
-    const newScore = Number(text);
+    const newScore =
+        Number(text);
 
     if (!Number.isInteger(newScore)) {
         return;
@@ -229,24 +575,28 @@ window.saveScore = async function(event) {
 
     const db = getDB();
 
-    const idx = db.Users.findIndex(
-        ({ ID }) => `${ID}` === id
-    );
+    const idx =
+        db.Users.findIndex(
+            ({ ID }) =>
+                `${ID}` === id
+        );
 
     if (idx === -1) {
         return;
     }
 
-    const newDB = structuredClone(db);
+    const newDB =
+        structuredClone(db);
 
-    newDB.Users[idx].Score = newScore;
+    newDB.Users[idx].Score =
+        newScore;
 
     await sendDB(newDB);
 };
 
 
 /* ==================================================
-   Player team management
+   Player team editing
    ================================================== */
 
 const changePlayerTeam = async (
@@ -255,17 +605,22 @@ const changePlayerTeam = async (
 ) => {
     const db = getDB();
 
-    const idx = db.Users.findIndex(
-        ({ ID }) => `${ID}` === `${playerId}`
-    );
+    const idx =
+        db.Users.findIndex(
+            ({ ID }) =>
+                `${ID}` ===
+                `${playerId}`
+        );
 
     if (idx === -1) {
         return;
     }
 
-    const newDB = structuredClone(db);
+    const newDB =
+        structuredClone(db);
 
-    newDB.Users[idx].Team = teamName;
+    newDB.Users[idx].Team =
+        teamName;
 
     await sendDB(newDB);
 };
@@ -280,8 +635,11 @@ createTeamForm.addEventListener(
     async (event) => {
         event.preventDefault();
 
-        const name = newTeamName.value.trim();
-        const color = newTeamColor.value;
+        const name =
+            newTeamName.value.trim();
+
+        const color =
+            newTeamColor.value;
 
         if (name === "") {
             return;
@@ -289,16 +647,19 @@ createTeamForm.addEventListener(
 
         const db = getDB();
 
-        const exists = db.Teams.some(
-            ({ Name }) => Name === name
-        );
+        const exists =
+            db.Teams.some(
+                ({ Name }) =>
+                    Name === name
+            );
 
         if (exists) {
             newTeamName.select();
             return;
         }
 
-        const newDB = structuredClone(db);
+        const newDB =
+            structuredClone(db);
 
         newDB.Teams.push({
             Name: name,
@@ -308,7 +669,8 @@ createTeamForm.addEventListener(
         await sendDB(newDB);
 
         newTeamName.value = "";
-        newTeamColor.value = "#ffffff";
+        newTeamColor.value =
+            "#ffffff";
 
         newTeamName.focus();
     }
@@ -316,7 +678,7 @@ createTeamForm.addEventListener(
 
 
 /* ==================================================
-   Team color management
+   Team color editing
    ================================================== */
 
 const changeTeamColor = async (
@@ -325,25 +687,28 @@ const changeTeamColor = async (
 ) => {
     const db = getDB();
 
-    if (db == null || !Array.isArray(db.Teams)) {
+    if (
+        db == null ||
+        !Array.isArray(db.Teams)
+    ) {
         return;
     }
 
-    const idx = db.Teams.findIndex(
-        ({ Name }) => Name === teamName
-    );
+    const idx =
+        db.Teams.findIndex(
+            ({ Name }) =>
+                Name === teamName
+        );
 
     if (idx === -1) {
         return;
     }
 
-    const newDB = structuredClone(db);
+    const newDB =
+        structuredClone(db);
 
-    newDB.Teams[idx].Color = color;
-
-    console.log(
-        `Changing team "${teamName}" color to ${color}`
-    );
+    newDB.Teams[idx].Color =
+        color;
 
     await sendDB(newDB);
 };
@@ -357,7 +722,8 @@ window.deleteTeam = async function(event) {
     const teamElement =
         event.currentTarget.parentElement;
 
-    const teamName = teamElement.dataset.team;
+    const teamName =
+        teamElement.dataset.team;
 
     if (teamName == null) {
         return;
@@ -365,25 +731,151 @@ window.deleteTeam = async function(event) {
 
     const db = getDB();
 
-    const teamExists = db.Teams.some(
-        ({ Name }) => Name === teamName
-    );
+    const exists =
+        db.Teams.some(
+            ({ Name }) =>
+                Name === teamName
+        );
 
-    if (!teamExists) {
+    if (!exists) {
         return;
     }
 
-    const newDB = structuredClone(db);
+    const newDB =
+        structuredClone(db);
 
-    newDB.Teams = newDB.Teams.filter(
-        ({ Name }) => Name !== teamName
-    );
+    newDB.Teams =
+        newDB.Teams.filter(
+            ({ Name }) =>
+                Name !== teamName
+        );
 
-    newDB.Users.forEach((user) => {
-        if (user.Team === teamName) {
-            user.Team = "";
+    /*
+     * Players belonging to a deleted team are
+     * moved to no team.
+     */
+    newDB.Users.forEach(
+        (user) => {
+            if (
+                user.Team === teamName
+            ) {
+                user.Team = "";
+            }
         }
-    });
+    );
 
     await sendDB(newDB);
 };
+
+
+/* ==================================================
+   Winner announcement
+   ================================================== */
+
+announceWinnerButton.addEventListener(
+    "click",
+    () => {
+        const value =
+            winnerSelect.value;
+
+        if (value === "") {
+            return;
+        }
+
+        const db = getDB();
+
+        let winnerName = "";
+        let winnerColor =
+            "#ffffff";
+
+
+        /*
+         * Player winner
+         */
+
+        if (
+            value.startsWith(
+                "player:"
+            )
+        ) {
+            const playerId =
+                value.substring(
+                    "player:".length
+                );
+
+            const player =
+                db.Users.find(
+                    ({ ID }) =>
+                        `${ID}` ===
+                        playerId
+                );
+
+            if (player == null) {
+                return;
+            }
+
+            winnerName =
+                player.Name;
+
+            /*
+             * A player's winner banner uses
+             * their team's color.
+             */
+            const team =
+                db.Teams.find(
+                    ({ Name }) =>
+                        Name ===
+                        player.Team
+                );
+
+            if (team != null) {
+                winnerColor =
+                    team.Color;
+            }
+        }
+
+
+        /*
+         * Team winner
+         */
+
+        if (
+            value.startsWith(
+                "team:"
+            )
+        ) {
+            const teamName =
+                value.substring(
+                    "team:".length
+                );
+
+            const team =
+                db.Teams.find(
+                    ({ Name }) =>
+                        Name ===
+                        teamName
+                );
+
+            if (team == null) {
+                return;
+            }
+
+            winnerName =
+                team.Name;
+
+            winnerColor =
+                team.Color;
+        }
+
+
+        if (winnerName === "") {
+            return;
+        }
+
+        sendAnnouncement({
+            type: "winner",
+            name: winnerName,
+            color: winnerColor
+        });
+    }
+);

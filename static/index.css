@@ -706,3 +706,178 @@ button:active {
         grid-column: 1 / -1;
     }
 }
+
+
+#winnerBanner {
+    --winner-color: #ffffff;
+
+    position: fixed;
+    z-index: 1000;
+
+    top: 50%;
+    left: 50%;
+
+    width: 160vw;
+
+    padding: 18px 0;
+
+    background: var(--winner-color);
+    color: #000;
+
+    text-align: center;
+
+    font-size: clamp(
+        2rem,
+        5vw,
+        5rem
+    );
+
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%, -50%)
+        rotate(-12deg)
+        scale(0);
+
+    opacity: 0;
+
+    box-shadow:
+        0 0 40px
+        color-mix(
+            in srgb,
+            var(--winner-color),
+            transparent 45%
+        );
+
+    transition:
+        transform 350ms cubic-bezier(
+            0.16,
+            1,
+            0.3,
+            1
+        ),
+        opacity 200ms ease;
+}
+
+#winnerBanner.visible {
+    opacity: 1;
+
+    transform:
+        translate(-50%, -50%)
+        rotate(-12deg)
+        scale(1);
+}
+
+#winnerBannerText {
+    white-space: nowrap;
+}
+
+
+/* ==================================================
+   Control panel
+   ================================================== */
+
+#controlPanel {
+    padding: 20px;
+}
+
+#winnerControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#winnerControls label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+#winnerSelect {
+    min-width: 220px;
+    padding: 9px 11px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font: inherit;
+}
+
+#winnerSelect:focus {
+    outline: none;
+    border-color: #66666f;
+}
+
+#announceWinner {
+    padding: 9px 14px;
+
+    background: var(--winner-accent, #fff);
+    color: #000;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    font: inherit;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+#announceWinner:hover {
+    filter: brightness(0.9);
+}
+
+@media (max-width: 600px) {
+    #winnerControls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #winnerSelect {
+        width: 100%;
+    }
+}
+
+#winnerBanner {
+    position: fixed;
+    top: 45%;
+    left: -10%;
+    width: 120%;
+    padding: 24px 0;
+
+    background: var(--winner-color, white);
+    color: black;
+
+    text-align: center;
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    transform: rotate(-8deg) translateY(-100px);
+    opacity: 0;
+
+    cursor: pointer;
+    pointer-events: none;
+
+    z-index: 1000;
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+#winnerBanner.visible {
+    opacity: 1;
+    transform: rotate(-8deg) translateY(0);
+    pointer-events: auto;
+}
+
+

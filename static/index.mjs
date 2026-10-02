@@ -1,121 +1,446 @@
-import { onDBUpdate } from "./db.mjs";
+import {
+    getDB,
+    onDBUpdate
+} from "./db.mjs";
 
-const scoreBody = document.querySelector("#scores tbody");
-const scoreTmpl = document.querySelector("#scores > table > tbody > template");
 
-const teamBody = document.querySelector("#teams tbody");
-const teamTmpl = document.querySelector("#teams > table > tbody > template");
+/* ==================================================
+   Scoreboard
+   ================================================== */
 
-const makeScoreRow = ({ ID, Name, Team, Score }) => {
-    const row = document.importNode(
-        scoreTmpl.content,
-        true
-    ).firstElementChild;
+const scoreBody =
+    document.querySelector("#scores tbody");
+
+const scoreTmpl =
+    document.querySelector(
+        "#scores > table > tbody > template"
+    );
+
+
+const makeScoreRow = ({
+    ID,
+    Name,
+    Team,
+    Score
+}) => {
+    const clone =
+        document.importNode(
+            scoreTmpl.content,
+            true
+        );
+
+    const row =
+        clone.firstElementChild;
 
     row.id = ID;
 
-    row.querySelector(".name").textContent = Name;
-    row.querySelector(".team").textContent = Team;
-    row.querySelector(".score").textContent = Score;
+    row.querySelector(
+        ".name"
+    ).textContent = Name;
+
+    row.querySelector(
+        ".team"
+    ).textContent = Team;
+
+    row.querySelector(
+        ".score"
+    ).textContent = Score;
 
     scoreBody.appendChild(row);
-
-    return row;
 };
 
-const makeTeamRow = ({ Name, Color }) => {
-    const row = document.importNode(
-        teamTmpl.content,
-        true
-    ).firstElementChild;
+
+/* ==================================================
+   Teams
+   ================================================== */
+
+const teamBody =
+    document.querySelector("#teams tbody");
+
+const teamTmpl =
+    document.querySelector(
+        "#teams > table > tbody > template"
+    );
+
+
+const makeTeamRow = ({
+    Name,
+    Color
+}) => {
+    const clone =
+        document.importNode(
+            teamTmpl.content,
+            true
+        );
+
+    const row =
+        clone.firstElementChild;
 
     row.id = Name;
-    row.style.setProperty("--team-color", Color);
 
-    row.querySelector(".teamName").textContent = Name;
-    row.querySelector(".teamTotalScore").textContent = "0";
+    row.querySelector(
+        ".teamName"
+    ).textContent = Name;
+
+    row.querySelector(
+        ".teamTotalScore"
+    ).textContent = "0";
+
+    row.style.setProperty(
+        "--team-color",
+        Color || "#ffffff"
+    );
 
     teamBody.appendChild(row);
-
-    return row;
 };
 
-const sync = ({ Users, Teams }) => {
-    // Scores
-    Users.forEach(({ ID, Name, Team, Score }) => {
-        let row = scoreBody.querySelector(`tr[id="${ID}"]`);
 
-        if (row == null) {
-            row = makeScoreRow({
-                ID,
-                Name,
-                Team,
-                Score
-            });
+/* ==================================================
+   Scoreboard sync
+   ================================================== */
+
+const syncScores = (Users) => {
+    Users.forEach(
+        ({
+            ID,
+            Name,
+            Team,
+            Score
+        }) => {
+            let row =
+                scoreBody.querySelector(
+                    `tr[id="${CSS.escape(String(ID))}"]`
+                );
+
+            if (row == null) {
+                makeScoreRow({
+                    ID,
+                    Name,
+                    Team,
+                    Score
+                });
+
+                row =
+                    scoreBody.querySelector(
+                        `tr[id="${CSS.escape(String(ID))}"]`
+                    );
+            }
+
+            row.querySelector(
+                ".name"
+            ).textContent = Name;
+
+            row.querySelector(
+                ".team"
+            ).textContent = Team;
+
+            row.querySelector(
+                ".score"
+            ).textContent = Score;
         }
+    );
 
-        const name = row.querySelector(".name");
-        const teamName = row.querySelector(".team");
-        const score = row.querySelector(".score");
+    scoreBody
+        .querySelectorAll(":scope > tr")
+        .forEach((row) => {
+            const exists =
+                Users.some(
+                    ({ ID }) =>
+                        `${ID}` === row.id
+                );
 
-        if (name.textContent !== Name) {
-            name.textContent = Name;
-        }
+            if (!exists) {
+                row.remove();
+            }
+        });
+};
 
-        if (teamName.textContent !== Team) {
-            teamName.textContent = Team;
-        }
 
-        if (score.textContent !== `${Score}`) {
-            score.textContent = Score;
-        }
+/* ==================================================
+   Team sync
+   ================================================== */
 
-        const team = Teams.find(({ Name }) => Name === Team);
+const syncTeams = (
+    Users,
+    Teams
+) => {
+    Teams.forEach(
+        ({
+            Name,
+            Color
+        }) => {
+            let row =
+                teamBody.querySelector(
+                    `tr[id="${CSS.escape(Name)}"]`
+                );
 
-        if (team != null) {
-            row.style.setProperty("--team-color", team.Color);
-            row.style.borderLeft = `5px solid ${team.Color}`;
-            row.style.backgroundColor =
-                `color-mix(in srgb, ${team.Color} 12%, var(--surface))`;
-        } else {
-            row.style.removeProperty("--team-color");
-            row.style.borderLeft = "";
-            row.style.backgroundColor = "";
-        }
-    });
+            if (row == null) {
+                makeTeamRow({
+                    Name,
+                    Color
+                });
 
-    // Teams
-    Teams.forEach(({ Name, Color }) => {
-        let row = teamBody.querySelector(`tr[id="${Name}"]`);
+                row =
+                    teamBody.querySelector(
+                        `tr[id="${CSS.escape(Name)}"]`
+                    );
+            }
 
-        if (row == null) {
-            row = makeTeamRow({
-                Name,
-                Color
-            });
-        }
+            row.querySelector(
+                ".teamName"
+            ).textContent = Name;
 
-        row.style.setProperty("--team-color", Color);
-
-        const teamName = row.querySelector(".teamName");
-
-        if (teamName.textContent !== Name) {
-            teamName.textContent = Name;
-        }
-
-        const total = Users
-            .filter(({ Team }) => Team === Name)
-            .reduce(
-                (sum, { Score }) => sum + (Number(Score) || 0),
-                0
+            row.style.setProperty(
+                "--team-color",
+                Color || "#ffffff"
             );
 
-        const totalElement = row.querySelector(".teamTotalScore");
+            const total =
+                Users
+                    .filter(
+                        ({ Team }) =>
+                            Team === Name
+                    )
+                    .reduce(
+                        (
+                            sum,
+                            { Score }
+                        ) =>
+                            sum +
+                            (
+                                Number(Score) ||
+                                0
+                            ),
+                        0
+                    );
 
-        if (totalElement.textContent !== `${total}`) {
-            totalElement.textContent = total;
+            row.querySelector(
+                ".teamTotalScore"
+            ).textContent = total;
         }
-    });
+    );
+
+    teamBody
+        .querySelectorAll(":scope > tr")
+        .forEach((row) => {
+            const exists =
+                Teams.some(
+                    ({ Name }) =>
+                        Name === row.id
+                );
+
+            if (!exists) {
+                row.remove();
+            }
+        });
+};
+
+
+/* ==================================================
+   DB sync
+   ================================================== */
+
+const sync = ({
+    Users,
+    Teams
+}) => {
+    syncScores(Users);
+
+    syncTeams(
+        Users,
+        Teams
+    );
 };
 
 onDBUpdate(sync);
+
+
+/* ==================================================
+   Winner banner
+   ================================================== */
+
+const winnerBanner =
+    document.querySelector("#winnerBanner");
+
+let winnerTimeout = null;
+
+
+const hideWinnerBanner = () => {
+    if (winnerTimeout !== null) {
+        clearTimeout(
+            winnerTimeout
+        );
+
+        winnerTimeout = null;
+    }
+
+    if (winnerBanner == null) {
+        return;
+    }
+
+    winnerBanner.classList.remove(
+        "visible"
+    );
+
+    /*
+     * Remove the banner from the layout after
+     * the transition has finished.
+     */
+    setTimeout(() => {
+        if (
+            !winnerBanner.classList.contains(
+                "visible"
+            )
+        ) {
+            winnerBanner.hidden = true;
+        }
+    }, 300);
+};
+
+
+const showWinnerBanner = (
+    name,
+    color
+) => {
+    if (winnerBanner == null) {
+        return;
+    }
+
+    /*
+     * If another winner is currently displayed,
+     * cancel its existing timer.
+     */
+    if (winnerTimeout !== null) {
+        clearTimeout(
+            winnerTimeout
+        );
+    }
+
+    winnerBanner.textContent = name;
+
+    winnerBanner.style.setProperty(
+        "--winner-color",
+        color || "#ffffff"
+    );
+
+    winnerBanner.hidden = false;
+
+    /*
+     * Force the browser to notice the hidden ->
+     * visible transition.
+     */
+    requestAnimationFrame(() => {
+        winnerBanner.classList.add(
+            "visible"
+        );
+    });
+
+    /*
+     * Automatically hide after one minute.
+     */
+    winnerTimeout = setTimeout(
+        () => {
+            hideWinnerBanner();
+        },
+        60 * 1000
+    );
+};
+
+
+/*
+ * Clicking the banner dismisses it immediately.
+ */
+if (winnerBanner != null) {
+    winnerBanner.addEventListener(
+        "click",
+        hideWinnerBanner
+    );
+}
+
+
+/* ==================================================
+   WebSocket
+   ================================================== */
+
+let socket = null;
+
+
+const connectWebSocket = () => {
+    const protocol =
+        location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
+
+    socket =
+        new WebSocket(
+            `${protocol}//${location.host}/ws`
+        );
+
+    socket.addEventListener(
+        "open",
+        () => {
+            console.log(
+                "WebSocket connected"
+            );
+        }
+    );
+
+    socket.addEventListener(
+        "message",
+        (event) => {
+            let message;
+
+            try {
+                message =
+                    JSON.parse(
+                        event.data
+                    );
+            } catch (error) {
+                console.error(
+                    "Invalid WebSocket message:",
+                    event.data
+                );
+
+                return;
+            }
+
+            if (
+                message.type === "winner"
+            ) {
+                showWinnerBanner(
+                    message.name,
+                    message.color
+                );
+            }
+        }
+    );
+
+    socket.addEventListener(
+        "close",
+        () => {
+            console.log(
+                "WebSocket disconnected; reconnecting..."
+            );
+
+            setTimeout(
+                connectWebSocket,
+                1000
+            );
+        }
+    );
+
+    socket.addEventListener(
+        "error",
+        (error) => {
+            console.error(
+                "WebSocket error:",
+                error
+            );
+        }
+    );
+};
+
+
+connectWebSocket();
+
+

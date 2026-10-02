@@ -10,6 +10,7 @@ import (
 
 	"github.com/blottn/scoreboard/db"
 	"github.com/blottn/scoreboard/leases"
+	"golang.org/x/net/websocket"
 )
 
 func main() {
@@ -72,49 +73,63 @@ func run() error {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "claimed")
 	})
-	/*http.Handle("/ws/{player}", &websocket.Server{
-		Handler: func(c *websocket.Conn) {
-			defer c.Close()
-			req := c.Request()
-			player := req.PathValue("player")
-			if player == "" {
-				slog.Error("player header was not set")
-				return
-			}
-			playerId, err := strconv.Atoi(player)
-			if err != nil {
-				slog.Error(fmt.Sprintf("parse playerId: %s", err.Error()))
-				return
-			}
-			for _, usr := range db.DB.Users {
-				if usr.ID == playerId {
-					if usr.Free {
-						usr.Free = false
-						slog.Info("taking lease", "player", usr.Name)
-						leases.TakeLease(ctx, playerId, c)
-						slog.Info("releasing", "player", usr.Name)
-						usr.Free = true
-					} else {
-						fmt.Fprintln(c, "Lease already taken for player")
-						c.Close()
+	room := []*websocket.Conn{}
+
+	http.Handle("/ws", &websocket.Server{
+		Handler: func(ws *websocket.Conn) {
+			room = append(room, ws)
+
+			defer func() {
+				for i, conn := range room {
+					if conn == ws {
+						room = append(room[:i], room[i+1:]...)
+						break
+					}
+				}
+
+				ws.Close()
+			}()
+
+			for {
+				var msg string
+
+				err := websocket.Message.Receive(ws, &msg)
+				if err != nil {
+					return
+				}
+
+				if msg == "" {
+					continue
+				}
+
+				slog.Info(
+					fmt.Sprintf(
+						"websocket message: %s",
+						msg,
+					),
+				)
+
+				for _, conn := range room {
+					if conn == ws {
+						continue
+					}
+
+					err := websocket.Message.Send(
+						conn,
+						msg,
+					)
+					if err != nil {
+						slog.Info(
+							fmt.Sprintf(
+								"websocket send error: %s",
+								err,
+							),
+						)
 					}
 				}
 			}
 		},
 	})
-	http.HandleFunc("/leases/free", func(w http.ResponseWriter, r *http.Request) {
-		free := []int{}
-		for _, usr := range db.DB.Users {
-			if usr.Free {
-				free = append(free, usr.ID)
-			}
-		}
-		err := json.NewEncoder(w).Encode(free)
-		if err != nil {
-			slog.Error(err.Error())
-		}
-	})*/
-
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	slog.Info(fmt.Sprintf("listening on %s", *listenAddr))

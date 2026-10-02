@@ -17,6 +17,7 @@
     </nav>
 
     <div id="mainView">
+
         <div id="players">
             <table>
                 <thead>
@@ -110,6 +111,29 @@
                 </button>
             </form>
         </div>
+
+        <div id="controlPanel">
+            <div class="adminPanelHeader">
+                <h2>Control Panel</h2>
+            </div>
+
+            <div id="winnerControls">
+                <label for="winnerSelect">
+                    Winner
+                </label>
+
+                <select id="winnerSelect">
+                    <option value="">
+                        Select a winner
+                    </option>
+                </select>
+
+                <button id="announceWinner">
+                    Announce Winner
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script type="module" src="./admin.mjs"></script>

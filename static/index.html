@@ -1,29 +1,35 @@
 <head>
     <title>scoreboard</title>
-    <link rel="stylesheet" href="./index.css"></link>
 
-    <script async src="./index.mjs" type="module"></script>
-    <script async src="./player.mjs" type="module"></script>
-    <script async src="./playerName.mjs" type="module"></script>
+    <link rel="stylesheet" href="./index.css">
+
+    <script
+        async
+        src="./index.mjs"
+        type="module"
+    ></script>
+
+    <script
+        async
+        src="./announcement.mjs"
+        type="module"
+    ></script>
 </head>
 
 <body>
+    <div id="winnerBanner">
+        <div id="winnerBannerText"></div>
+    </div>
+
     <nav>
         <div>
-            <a id="title" href="/">SCOREBOARD</a>
-            <a href="/admin.html">admin</a>
-        </div>
+            <a id="title" href="/">
+                SCOREBOARD
+            </a>
 
-        <div id="playerName">
-            <span id="playerNameLabel">No player selected</span>
-
-            <input
-                id="playerNameInput"
-                type="text"
-                autocomplete="off"
-                maxlength="32"
-                hidden
-            >
+            <a href="/admin.html">
+                admin
+            </a>
         </div>
 
         <p id="np">
@@ -37,26 +43,43 @@
             <template id="playerOption">
                 <div onclick="becomePlayer(event)">
                     <div class="mytest"></div>
+
                     <p class="name"></p>
                 </div>
             </template>
+
+            <script
+                async
+                type="module"
+                src="./player.mjs"
+            ></script>
         </div>
 
         <div id="mainView">
             <div id="scores">
                 <table>
-                    <tr>
-                        <th>Player Name</th>
-                        <th>Player Team</th>
-                        <th>Player Score</th>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>Player Name</th>
+                            <th>Player Team</th>
+                            <th>Player Score</th>
+                        </tr>
+                    </thead>
 
                     <tbody>
                         <template>
                             <tr>
-                                <td class="name">name</td>
-                                <td class="team">team</td>
-                                <td class="score">score</td>
+                                <td class="name">
+                                    name
+                                </td>
+
+                                <td class="team">
+                                    team
+                                </td>
+
+                                <td class="score">
+                                    score
+                                </td>
                             </tr>
                         </template>
                     </tbody>
@@ -69,6 +92,7 @@
                         <template>
                             <tr>
                                 <td class="teamName"></td>
+
                                 <td class="teamTotalScore"></td>
                             </tr>
                         </template>
