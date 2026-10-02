@@ -1,44 +1,60 @@
-import { getDB, sendDB } from "./db.mjs";
+import { getDB, sendDB, onDBUpdate } from "./db.mjs";
 
-let { Users, ...db } = await getDB();
+const assigns = document.querySelector("#assigns");
+const tmpl = assigns.querySelector("template");
 
-let assigns = document.querySelector("#assigns");
-let tmpl = assigns.querySelector("template");
+const sync = ({ Users }) => {
+    Users
+        .filter(({ Claimer }) => Claimer !== "")
+        .forEach(({ Name, ID, Claimer }) => {
+            let instance = assigns.querySelector(
+                `div[id="${ID}"]`
+            );
 
-const sync = async () => {
-    let { Users, ...db } = await getDB();
-    Users.filter(({Claimer}) => Claimer !== "")
-        .forEach(({Name, ID, Claimer}) => {
-           let instance = assigns.querySelector(`div[id="${ID}"]`);
             if (instance == null) {
-                console.log("new node");
-                instance = document.importNode(tmpl.content, true);
-                instance = instance.firstElementChild;
+                instance = document.importNode(
+                    tmpl.content,
+                    true
+                ).firstElementChild;
+
                 instance.id = ID;
                 assigns.appendChild(instance);
             }
+
             instance.querySelector(".name").textContent = Name;
             instance.querySelector(".owner").textContent = Claimer;
-    });
-    Users.filter(({Claimer}) => Claimer === "")
-        .forEach(({ID}) => {
-            let instance = assigns.querySelector(`div[id="${ID}"]`)
+        });
+
+    Users
+        .filter(({ Claimer }) => Claimer === "")
+        .forEach(({ ID }) => {
+            const instance = assigns.querySelector(
+                `div[id="${ID}"]`
+            );
+
             if (instance != null) {
-                assigns.removeChild(instance);
+                instance.remove();
             }
-        })
-    setTimeout(sync, 200);
-}
-sync();
+        });
+};
+
+onDBUpdate(sync);
 
 window.logoutUser = async function(event) {
-    let { Users, ...db } = await getDB();
+    const id = event.currentTarget.parentElement.id;
+    const db = getDB();
 
-    
-    let idx = Users.findIndex(({ID}) => `${ID}` === event.target.parentElement.id)
-    if (idx === undefined) {
-        return
+    const idx = db.Users.findIndex(
+        ({ ID }) => `${ID}` === id
+    );
+
+    if (idx === -1) {
+        return;
     }
-    Users[idx].Claimer = "";
-    sendDB({Users, ...db});
-}
+
+    const newDB = structuredClone(db);
+
+    newDB.Users[idx].Claimer = "";
+
+    await sendDB(newDB);
+};

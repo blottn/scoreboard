@@ -1,71 +1,121 @@
-import { getDB } from "./db.mjs";
+import { onDBUpdate } from "./db.mjs";
 
-let { Users, Teams } = await getDB()
+const scoreBody = document.querySelector("#scores tbody");
+const scoreTmpl = document.querySelector("#scores > table > tbody > template");
 
+const teamBody = document.querySelector("#teams tbody");
+const teamTmpl = document.querySelector("#teams > table > tbody > template");
 
-// Scoreboard
-let scoreBody = document.querySelector("#scores tbody");
-let scoreTmpl = document.querySelector("#scores > table > tbody > template");
-const makeScoreRow = ({ID, Name, Team, Score}) => {
-    const clone = document.importNode(scoreTmpl.content, true);
-    clone.firstElementChild.id = ID;
-    let name = clone.querySelector(".name");
-    name.textContent = Name;
-    let team = clone.querySelector(".team");
-    team.textContent = Team;
-    let score = clone.querySelector(".score");
-    score.textContent = Score;
-    scoreBody.appendChild(clone);
-}
+const makeScoreRow = ({ ID, Name, Team, Score }) => {
+    const row = document.importNode(
+        scoreTmpl.content,
+        true
+    ).firstElementChild;
 
-const updateScoreRow = ({ID, Name, Team, Score}) => {
-    let el = document.getElementById(ID);
-    let name = el.querySelector(".name");
-    name.textContent = Name;
-    let team = el.querySelector(".team");
-    team.textContent = Team;
-    let score = el.querySelector(".score");
-    score.textContent = Score;
-}
-// End scoreboard
+    row.id = ID;
 
+    row.querySelector(".name").textContent = Name;
+    row.querySelector(".team").textContent = Team;
+    row.querySelector(".score").textContent = Score;
 
-// Teams
-let teamBody = document.querySelector("#teams tbody");
-let teamTmpl = document.querySelector("#teams > table > tbody > template");
-const makeTeamRow = ({Name, Color}) => {
-    const clone = document.importNode(teamTmpl.content, true);
-    clone.firstElementChild.id = Name;
-    let name = clone.querySelector(".teamName");
-    name.textContent = Name;
-    let team = clone.querySelector(".teamTotalScore");
-    team.textContent = "0"; // TODO calcoolate
-    teamBody.appendChild(clone);
-}
+    scoreBody.appendChild(row);
 
-const updateTeamRow = ({Name, Color}) => {
-    let el = document.getElementById(Name);
-    let name = el.querySelector(".teamName");
-    name.textContent = Name;
-    let score = el.querySelector(".teamTotalScore");
-    score.textContent = "0"; // TODO calcoolate
-}
-// End Teams
+    return row;
+};
 
-Users.forEach((user) => {
-    console.log(user);
-    makeScoreRow(user)
-});
+const makeTeamRow = ({ Name, Color }) => {
+    const row = document.importNode(
+        teamTmpl.content,
+        true
+    ).firstElementChild;
 
-Teams.forEach((team) => {
-    console.log(team);
-    makeTeamRow(team);
-});
-// Useful for testing
-/*const bumpUserScore = () => {
-    let usr = Users[0];
-    usr.Score += 1;
-    updateScoreRow(usr);
-    setTimeout(bumpUserScore, 750)
-}
-bumpUserScore();*/
+    row.id = Name;
+    row.style.setProperty("--team-color", Color);
+
+    row.querySelector(".teamName").textContent = Name;
+    row.querySelector(".teamTotalScore").textContent = "0";
+
+    teamBody.appendChild(row);
+
+    return row;
+};
+
+const sync = ({ Users, Teams }) => {
+    // Scores
+    Users.forEach(({ ID, Name, Team, Score }) => {
+        let row = scoreBody.querySelector(`tr[id="${ID}"]`);
+
+        if (row == null) {
+            row = makeScoreRow({
+                ID,
+                Name,
+                Team,
+                Score
+            });
+        }
+
+        const name = row.querySelector(".name");
+        const teamName = row.querySelector(".team");
+        const score = row.querySelector(".score");
+
+        if (name.textContent !== Name) {
+            name.textContent = Name;
+        }
+
+        if (teamName.textContent !== Team) {
+            teamName.textContent = Team;
+        }
+
+        if (score.textContent !== `${Score}`) {
+            score.textContent = Score;
+        }
+
+        const team = Teams.find(({ Name }) => Name === Team);
+
+        if (team != null) {
+            row.style.setProperty("--team-color", team.Color);
+            row.style.borderLeft = `5px solid ${team.Color}`;
+            row.style.backgroundColor =
+                `color-mix(in srgb, ${team.Color} 12%, var(--surface))`;
+        } else {
+            row.style.removeProperty("--team-color");
+            row.style.borderLeft = "";
+            row.style.backgroundColor = "";
+        }
+    });
+
+    // Teams
+    Teams.forEach(({ Name, Color }) => {
+        let row = teamBody.querySelector(`tr[id="${Name}"]`);
+
+        if (row == null) {
+            row = makeTeamRow({
+                Name,
+                Color
+            });
+        }
+
+        row.style.setProperty("--team-color", Color);
+
+        const teamName = row.querySelector(".teamName");
+
+        if (teamName.textContent !== Name) {
+            teamName.textContent = Name;
+        }
+
+        const total = Users
+            .filter(({ Team }) => Team === Name)
+            .reduce(
+                (sum, { Score }) => sum + (Number(Score) || 0),
+                0
+            );
+
+        const totalElement = row.querySelector(".teamTotalScore");
+
+        if (totalElement.textContent !== `${total}`) {
+            totalElement.textContent = total;
+        }
+    });
+};
+
+onDBUpdate(sync);

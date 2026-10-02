@@ -1,50 +1,71 @@
-import { getDB, sendDB } from "./db.mjs";
+import { getDB, sendDB, onDBUpdate } from "./db.mjs";
 
-let { Users, Teams } = await getDB();
+const playersTbl = document.querySelector("table");
+const playerTmpl = document.querySelector("template#player");
 
-let playersTbl = document.querySelector("table");
-let playerTmpl = document.querySelector("template#player");
+const sync = ({ Users }) => {
+    Users.forEach(({ ID, Name, Team, Score }) => {
+        let row = playersTbl.querySelector(`tr[id="${ID}"]`);
 
-// Sync ensures the UI makes sense given the current db
-function sync() {
-    let { Users, Teams} = getDB(); 
-    // Add/ update
-    Users.forEach(({ID, Name, Team, Score}) => {
-        let row = document.querySelector(`tr[id="${ID}"]`);
         if (row == null) {
-            row = document.importNode(playerTmpl.content, true);
-            row = row.firstElementChild;
+            row = document.importNode(
+                playerTmpl.content,
+                true
+            ).firstElementChild;
+
             row.id = ID;
             playersTbl.appendChild(row);
         }
+
         row.querySelector(".name").textContent = Name;
         row.querySelector(".team").textContent = Team;
-        row.querySelector(".score").textContent = Score;
-    })
-    setTimeout(500, sync)
-}
-sync();
+
+        const score = row.querySelector(".score");
+
+        // Don't overwrite the value while the admin is editing it.
+        if (document.activeElement !== score) {
+            score.textContent = Score;
+        }
+    });
+};
+
+onDBUpdate(sync);
 
 window.editScore = function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         event.target.blur();
     }
-}
+};
 
-window.saveScore = function(event) {
-    let id = event.srcElement.parentElement.id
-    let newScore = event.srcElement.textContent;
-    setPlayerScore(id, newScore);
-    sendDB({Users, Teams });
-}
+window.saveScore = async function(event) {
+    const scoreElement = event.currentTarget;
+    const id = scoreElement.parentElement.id;
+    const text = scoreElement.textContent.trim();
 
-function setPlayerScore(playerId, score) {
-    let { Users, ...db} = getDB();
-    let idx = Users.findIndex(({ID}) => `${ID}` === playerId);
-    if (idx === undefined) {
-        return
+    if (text === "") {
+        return;
     }
-    Users[idx].Score = parseInt(score);
-    sendDB({Users, ...db});
-}
+
+    const newScore = Number(text);
+
+    if (!Number.isInteger(newScore)) {
+        return;
+    }
+
+    const db = getDB();
+
+    const idx = db.Users.findIndex(
+        ({ ID }) => `${ID}` === id
+    );
+
+    if (idx === -1) {
+        return;
+    }
+
+    const newDB = structuredClone(db);
+
+    newDB.Users[idx].Score = newScore;
+
+    await sendDB(newDB);
+};
