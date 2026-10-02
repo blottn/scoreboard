@@ -1,11 +1,27 @@
+const dbKey = "scoreboard-db";
+
 export let db = null;
 
 const listeners = new Set();
+
+const cachedDB = localStorage.getItem(dbKey);
+
+if (cachedDB != null) {
+    try {
+        db = JSON.parse(cachedDB);
+    } catch {
+        localStorage.removeItem(dbKey);
+    }
+}
 
 export const getDB = () => db;
 
 export const onDBUpdate = (listener) => {
     listeners.add(listener);
+
+    if (db !== null) {
+        listener(db);
+    }
 
     return () => {
         listeners.delete(listener);
@@ -21,9 +37,9 @@ const notifyListeners = () => {
 const updateDB = async () => {
     try {
         const resp = await fetch("/db");
-        const newDB = await resp.json();
+        db = await resp.json();
 
-        db = newDB;
+        localStorage.setItem(dbKey, JSON.stringify(db));
 
         console.log("current db:", db);
 
@@ -39,7 +55,7 @@ await updateDB();
 
 export const sendDB = async (newDB) => {
     const resp = await fetch("/db", {
-        method: "PUT",
+        method: "POST",
         body: JSON.stringify(newDB),
     });
 

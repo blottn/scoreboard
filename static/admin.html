@@ -1,42 +1,117 @@
 <head>
     <title>scoreboard admin</title>
-    <link rel="stylesheet" href="./index.css"></link>
+    <link rel="stylesheet" href="./index.css">
 </head>
+
 <body>
     <nav>
         <div>
             <a id="title" href="/">SCOREBOARD</a>
             <a href="/admin.html">admin</a>
         </div>
-        <p id="np">Now playing:<span id="playing">dev</span></p>
+
+        <p id="np">
+            Now playing:
+            <span id="playing">dev</span>
+        </p>
     </nav>
+
     <div id="mainView">
-        <div>
+        <div id="players">
             <table>
-                <tr>
-                    <th>Player Name</th>
-                    <th>Player Team</th>
-                    <th>Player Score</th>
-                </tr>
-                <template id="player">
+                <thead>
                     <tr>
-                        <td class="name">name</td>
-                        <td class="team">team</td>
-                        <td class="score" contenteditable="true" onkeydown="editScore(event)" onblur="saveScore(event)">75</td>
+                        <th>Player Name</th>
+                        <th>Player Team</th>
+                        <th>Player Score</th>
                     </tr>
-                </template>
+                </thead>
+
+                <tbody>
+                    <template id="player">
+                        <tr>
+                            <td class="name">name</td>
+
+                            <td class="team">
+                                <select class="teamSelect"></select>
+                            </td>
+
+                            <td
+                                class="score"
+                                contenteditable="true"
+                                onkeydown="editScore(event)"
+                                onblur="saveScore(event)"
+                            >75</td>
+                        </tr>
+                    </template>
+                </tbody>
             </table>
         </div>
+
         <div id="assigns">
             <template id="assignment">
                 <div class="assignee">
                     <p class="name">name</p>
                     <p class="owner">owner</p>
-                    <button onclick="logoutUser(event)">Log out</button>
+
+                    <button onclick="logoutUser(event)">
+                        Log out
+                    </button>
                 </div>
             </template>
-            <script type="module" src="assign.mjs"></script>
+        </div>
+
+        <div id="teamManager">
+            <div class="adminPanelHeader">
+                <h2>Teams</h2>
+            </div>
+
+            <div id="teams">
+                <template id="team">
+                    <div class="teamAdmin">
+                        <input
+                            class="teamColor"
+                            type="color"
+                            value="#ffffff"
+                            title="Team color"
+                        >
+
+                        <span class="teamName">Team</span>
+
+                        <button
+                            class="deleteTeam"
+                            onclick="deleteTeam(event)"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <form id="createTeam">
+                <input
+                    id="newTeamName"
+                    type="text"
+                    placeholder="Team name"
+                    maxlength="32"
+                    autocomplete="off"
+                    required
+                >
+
+                <input
+                    id="newTeamColor"
+                    type="color"
+                    value="#ffffff"
+                    title="Team color"
+                >
+
+                <button type="submit">
+                    Create team
+                </button>
+            </form>
         </div>
     </div>
-    <script type="module" src="admin.mjs" async></script>
+
+    <script type="module" src="./admin.mjs"></script>
+    <script type="module" src="./assign.mjs"></script>
 </body>

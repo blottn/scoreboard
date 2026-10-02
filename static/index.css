@@ -61,7 +61,7 @@ nav {
     border-bottom: 1px solid var(--border);
 }
 
-nav > div {
+nav > div:first-child {
     display: flex;
     align-items: center;
     gap: 24px;
@@ -73,25 +73,130 @@ nav > div {
     letter-spacing: 0.12em;
 }
 
-nav > div > a:not(#title) {
+nav > div:first-child > a:not(#title) {
     color: var(--muted);
     font-size: 0.9rem;
 }
 
-nav > div > a:not(#title):hover {
+nav > div:first-child > a:not(#title):hover {
     color: var(--text);
 }
 
+
+/* ==================================================
+   Player identity
+   ================================================== */
+
+#playerName {
+    margin-left: auto;
+    margin-right: 32px;
+    min-width: 180px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+#playerNameLabel {
+    position: relative;
+
+    padding: 6px 10px 7px;
+
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+
+    border-bottom: 2px solid var(--border);
+
+    cursor: pointer;
+
+    transition:
+        color 100ms ease,
+        border-color 100ms ease;
+}
+
+#playerNameLabel:hover {
+    color: white;
+    border-bottom-color: #888;
+}
+
+#playerNameLabel::before {
+    content: "PLAYER";
+
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: var(--muted);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+
+#playerNameLabel::after {
+    content: "↗";
+
+    margin-left: 7px;
+
+    color: var(--muted);
+    font-size: 0.7rem;
+
+    opacity: 0;
+    transition: opacity 100ms ease;
+}
+
+#playerNameLabel:hover::after {
+    opacity: 1;
+}
+
+#playerName:not(.has-player) #playerNameLabel {
+    color: var(--muted);
+    font-weight: 400;
+    cursor: default;
+}
+
+#playerNameInput {
+    width: 180px;
+
+    padding: 7px 10px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    border: 0;
+    border-bottom: 2px solid white;
+    border-radius: 0;
+
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+
+    outline: none;
+}
+
+
+/* ==================================================
+   Now playing
+   ================================================== */
+
 #np {
     margin: 0;
+    padding-left: 20px;
+
+    border-left: 1px solid var(--border);
+
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 #playing {
     margin-left: 8px;
-    color: var(--text);
-    font-weight: 600;
+
+    color: var(--muted);
+    font-weight: 700;
 }
 
 
@@ -155,7 +260,7 @@ tbody tr:hover {
 
 
 /* ==================================================
-   Scores
+   Score display
    ================================================== */
 
 .score {
@@ -246,7 +351,7 @@ button:active {
 
 
 /* ==================================================
-   Public scoreboard
+   Public scoreboard layout
    ================================================== */
 
 #pageBody {
@@ -325,6 +430,11 @@ button:active {
     background: #55555e;
 }
 
+
+/* ==================================================
+   Disabled player selection
+   ================================================== */
+
 #selectPlayer.disabled {
     opacity: 0.35;
     filter: grayscale(1);
@@ -341,8 +451,9 @@ button:active {
     transform: none;
 }
 
+
 /* ==================================================
-   Public scoreboard tables
+   Public scoreboard
    ================================================== */
 
 #scores,
@@ -357,8 +468,14 @@ button:active {
     font-weight: 700;
 }
 
+
+/* ==================================================
+   Team colors
+   ================================================== */
+
 #teams tbody tr {
     border-left: 5px solid var(--team-color);
+
     background: color-mix(
         in srgb,
         var(--team-color) 10%,
@@ -389,6 +506,20 @@ button:active {
 @media (max-width: 800px) {
     nav {
         padding: 0 20px;
+    }
+
+    #playerName {
+        margin-right: 16px;
+        min-width: 0;
+    }
+
+    #playerNameLabel {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+    #playerNameLabel::before {
+        display: none;
     }
 
     #np {
@@ -433,5 +564,145 @@ button:active {
     .assignee button {
         grid-column: 2;
         grid-row: 1 / 3;
+    }
+}
+
+#players {
+    overflow-x: auto;
+}
+
+.teamSelect {
+    min-width: 130px;
+    padding: 6px 9px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 5px;
+
+    font: inherit;
+    font-size: 0.85rem;
+
+    cursor: pointer;
+}
+
+.teamSelect:hover {
+    border-color: #50505a;
+}
+
+.teamSelect:focus {
+    outline: none;
+    border-color: #777;
+}
+
+#teamManager {
+    padding: 20px;
+}
+
+.adminPanelHeader {
+    margin-bottom: 16px;
+}
+
+.adminPanelHeader h2 {
+    margin: 0;
+
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+#teams {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.teamAdmin {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 12px;
+
+    background: #101013;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+}
+
+.teamAdmin .teamName {
+    font-weight: 600;
+}
+
+.teamColor {
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+
+.deleteTeam {
+    color: var(--muted);
+}
+
+.deleteTeam:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+#createTeam {
+    margin-top: 16px;
+
+    display: flex;
+    gap: 8px;
+}
+
+#createTeam input[type="text"] {
+    min-width: 0;
+    flex: 1;
+
+    padding: 9px 11px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font: inherit;
+}
+
+#createTeam input[type="text"]:focus {
+    outline: none;
+    border-color: #66666f;
+}
+
+#createTeam input[type="color"] {
+    width: 40px;
+    padding: 2px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    #createTeam {
+        display: grid;
+        grid-template-columns: 1fr 40px;
+    }
+
+    #createTeam button {
+        grid-column: 1 / -1;
     }
 }

@@ -1,4 +1,8 @@
-import { getDB, sendDB, onDBUpdate } from "./db.mjs";
+import {
+    getDB,
+    sendDB,
+    onDBUpdate
+} from "./db.mjs";
 
 const assigns = document.querySelector("#assigns");
 const tmpl = assigns.querySelector("template");
@@ -18,6 +22,7 @@ const sync = ({ Users }) => {
                 ).firstElementChild;
 
                 instance.id = ID;
+
                 assigns.appendChild(instance);
             }
 
@@ -42,6 +47,7 @@ onDBUpdate(sync);
 
 window.logoutUser = async function(event) {
     const id = event.currentTarget.parentElement.id;
+
     const db = getDB();
 
     const idx = db.Users.findIndex(

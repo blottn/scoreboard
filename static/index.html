@@ -1,28 +1,47 @@
 <head>
     <title>scoreboard</title>
     <link rel="stylesheet" href="./index.css"></link>
+
     <script async src="./index.mjs" type="module"></script>
+    <script async src="./player.mjs" type="module"></script>
+    <script async src="./playerName.mjs" type="module"></script>
 </head>
+
 <body>
     <nav>
         <div>
             <a id="title" href="/">SCOREBOARD</a>
             <a href="/admin.html">admin</a>
         </div>
-        <p id="np">Now playing:<span id="playing">dev</span></p>
+
+        <div id="playerName">
+            <span id="playerNameLabel">No player selected</span>
+
+            <input
+                id="playerNameInput"
+                type="text"
+                autocomplete="off"
+                maxlength="32"
+                hidden
+            >
+        </div>
+
+        <p id="np">
+            Now playing:
+            <span id="playing">dev</span>
+        </p>
     </nav>
+
     <div id="pageBody">
         <div id="selectPlayer">
-            <h4>Player Select</h4>
             <template id="playerOption">
-                
                 <div onclick="becomePlayer(event)">
                     <div class="mytest"></div>
                     <p class="name"></p>
                 </div>
             </template>
-            <script async type="module" src="./player.mjs"></script>
         </div>
+
         <div id="mainView">
             <div id="scores">
                 <table>
@@ -31,6 +50,7 @@
                         <th>Player Team</th>
                         <th>Player Score</th>
                     </tr>
+
                     <tbody>
                         <template>
                             <tr>
@@ -42,8 +62,8 @@
                     </tbody>
                 </table>
             </div>
+
             <div id="teams">
-                <h4>Teams</h4>
                 <table>
                     <tbody>
                         <template>
@@ -58,4 +78,3 @@
         </div>
     </div>
 </body>
-
