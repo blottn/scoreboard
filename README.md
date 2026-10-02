@@ -13,3 +13,6 @@ setting the current round / now playing bit
 
 ## Extras:
 communal whiteboard, ability to put stickers on other players, pretty animations
+
+## TODO
+Allow name reassignment
