@@ -41,7 +41,7 @@ const updateDB = async () => {
 
         localStorage.setItem(dbKey, JSON.stringify(db));
 
-        console.log("current db:", db);
+        console.debug("current db:", db);
 
         notifyListeners();
     } catch (error) {

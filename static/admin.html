@@ -32,7 +32,7 @@
                     <tbody>
                         <template id="player">
                             <tr>
-                                <td class="name">name</td>
+                                <td class="name" contenteditable="true" onkeydown="editName(event)" onblur="saveName(event)">name</td>
 
                                 <td class="team">
                                     <select class="teamSelect"></select>

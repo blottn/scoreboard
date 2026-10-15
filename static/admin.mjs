@@ -208,9 +208,12 @@ const syncPlayers = (
                 );
             }
 
-            row.querySelector(
+            const nameEl = row.querySelector(
                 ".name"
-            ).textContent = Name;
+            )
+            if (document.activeElement !== nameEl) {
+                nameEl.textContent = Name;
+            }
 
             const teamSelect =
                 row.querySelector(
@@ -550,7 +553,6 @@ window.editScore = function(event) {
     }
 };
 
-
 window.saveScore = async function(event) {
     const scoreElement =
         event.currentTarget;
@@ -592,6 +594,53 @@ window.saveScore = async function(event) {
 
     await sendDB(newDB);
 };
+
+/* ==================================================
+   Name editing
+   ================================================== */
+
+window.editName = function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        event.target.blur();
+    }
+};
+
+window.saveName = async function(event) {
+    const nameElement =
+        event.currentTarget;
+
+    const id =
+        nameElement.parentElement.id;
+
+    const text =
+        nameElement.textContent.trim();
+
+    if (text === "") {
+        return;
+    }
+
+    const db = getDB();
+
+    const idx =
+        db.Users.findIndex(
+            ({ ID }) =>
+                `${ID}` === id
+        );
+
+    if (idx === -1) {
+        return;
+    }
+
+    const newDB =
+        structuredClone(db);
+
+    newDB.Users[idx].Name =
+        text;
+
+    await sendDB(newDB);
+};
+
 
 
 /* ==================================================
