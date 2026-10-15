@@ -2,7 +2,6 @@
 
 const idKey = "score-agent-id";
 
-
 if (localStorage.getItem(idKey) == null) {
     const id =
         `${Date.now()}-${Math.random().toString(36).slice(2)}`;

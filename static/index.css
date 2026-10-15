@@ -890,3 +890,8 @@ button:active {
         width: 100px;
     }
 }
+
+#addPlayer {
+    margin: 8px 32px;
+    width: calc(100% - 64px);
+}
