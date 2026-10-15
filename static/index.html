@@ -18,11 +18,6 @@
         type="module"
     ></script>
 
-    <script
-        async
-        src="./name.mjs"
-        type="module"
-    ></script>
 </head>
 
 <body>
@@ -57,22 +52,6 @@
 
 
         <div id="navStatus">
-            <p id="playerIdentity">
-                you:
-                <span id="myPlayerName">
-                    name
-                </span>
-
-                <input
-                    id="playerNameInput"
-                    type="text"
-                    maxlength="32"
-                    autocomplete="off"
-                    spellcheck="false"
-                    hidden
-                >
-            </p>
-
             <p id="np">
                 Now playing:
                 <span id="playing">dev</span>
@@ -82,23 +61,6 @@
 
 
     <div id="pageBody">
-        <div id="selectPlayer">
-            <template id="playerOption">
-                <div onclick="becomePlayer(event)">
-                    <div class="mytest"></div>
-
-                    <p class="name"></p>
-                </div>
-            </template>
-
-            <script
-                async
-                type="module"
-                src="./player.mjs"
-            ></script>
-        </div>
-
-
         <div id="mainView">
             <div id="scores">
                 <table>
