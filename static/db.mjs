@@ -54,6 +54,8 @@ const updateDB = async () => {
 await updateDB();
 
 export const sendDB = async (newDB) => {
+    let db = await getDB();
+    let update = {...db, ...newDB};
     const resp = await fetch("/db", {
         method: "POST",
         body: JSON.stringify(newDB),

@@ -20,12 +20,14 @@ type Database struct {
 	Users      []*User
 	Teams      []*Team
 	NowPlaying string
+	Mode       string // either "team" or "player" (individual) mode
 }
 
 var DB = Database{
 	Users:      []*User{},
 	Teams:      []*Team{},
 	NowPlaying: "dev",
+	Mode:       "team",
 }
 
 func Start() error {
