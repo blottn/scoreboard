@@ -895,3 +895,30 @@ button:active {
     margin: 8px 32px;
     width: calc(100% - 64px);
 }
+
+table {
+    border-bottom: 1px solid;
+    border-color: var(--border);
+}
+td.score:hover, td.name:hover {
+    border: 1px solid #333;
+}
+
+td.delete {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+td.delete > span {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    border: 1px solid #272727;
+    color: #555;
+    padding:5px;
+    &:hover {
+        border: 1px solid #cc0000;
+        background-color: #550000;
+        color: red;
+        transform: skew(-10deg);
+    }
+}
