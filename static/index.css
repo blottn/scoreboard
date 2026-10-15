@@ -917,8 +917,9 @@ td.delete > span {
     padding:5px;
     &:hover {
         border: 1px solid #cc0000;
+        border-radius: 2px;
         background-color: #550000;
         color: red;
-        transform: skew(-10deg);
+        transform: skew(-5deg);
     }
 }
