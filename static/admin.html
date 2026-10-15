@@ -16,113 +16,115 @@
         </p>
     </nav>
 
-    <div id="mainView">
-
-        <div id="players">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Player Name</th>
-                        <th>Player Team</th>
-                        <th>Player Score</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <template id="player">
+    <div id="pageBody">
+        <div id="mainView">
+            <div id="players">
+                <table>
+                    <thead>
                         <tr>
-                            <td class="name">name</td>
-
-                            <td class="team">
-                                <select class="teamSelect"></select>
-                            </td>
-
-                            <td
-                                class="score"
-                                contenteditable="true"
-                                onkeydown="editScore(event)"
-                                onblur="saveScore(event)"
-                            >75</td>
+                            <th>Player Name</th>
+                            <th>Player Team</th>
+                            <th>Player Score</th>
+                            <th>Del</th>
                         </tr>
+                    </thead>
+
+                    <tbody>
+                        <template id="player">
+                            <tr>
+                                <td class="name">name</td>
+
+                                <td class="team">
+                                    <select class="teamSelect"></select>
+                                </td>
+                                <td
+                                    class="score"
+                                    contenteditable="true"
+                                    onkeydown="editScore(event)"
+                                    onblur="saveScore(event)"
+                                >75</td>
+                                <td class="delete" onclick="deletePlayer(event)">
+                                    XXX
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="teamManager">
+                <div class="adminPanelHeader">
+                    <h2>Teams</h2>
+                </div>
+
+                <div id="teams">
+                    <template id="team">
+                        <div class="teamAdmin">
+                            <input
+                                class="teamColor"
+                                type="color"
+                                value="#ffffff"
+                                title="Team color"
+                            >
+
+                            <span class="teamName">Team</span>
+
+                            <button
+                                class="deleteTeam"
+                                onclick="deleteTeam(event)"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </template>
-                </tbody>
-            </table>
+                </div>
+
+                <form id="createTeam">
+                    <input
+                        id="newTeamName"
+                        type="text"
+                        placeholder="Team name"
+                        maxlength="32"
+                        autocomplete="off"
+                        required
+                    >
+
+                    <input
+                        id="newTeamColor"
+                        type="color"
+                        value="#ffffff"
+                        title="Team color"
+                    >
+
+                    <button type="submit">
+                        Create team
+                    </button>
+                </form>
+            </div>
+
+            <div id="controlPanel">
+                <div class="adminPanelHeader">
+                    <h2>Control Panel</h2>
+                </div>
+
+                <div id="winnerControls">
+                    <label for="winnerSelect">
+                        Winner
+                    </label>
+
+                    <select id="winnerSelect">
+                        <option value="">
+                            Select a winner
+                        </option>
+                    </select>
+
+                    <button id="announceWinner">
+                        Announce Winner
+                    </button>
+                </div>
+            </div>
+
         </div>
-
-
-        <div id="teamManager">
-            <div class="adminPanelHeader">
-                <h2>Teams</h2>
-            </div>
-
-            <div id="teams">
-                <template id="team">
-                    <div class="teamAdmin">
-                        <input
-                            class="teamColor"
-                            type="color"
-                            value="#ffffff"
-                            title="Team color"
-                        >
-
-                        <span class="teamName">Team</span>
-
-                        <button
-                            class="deleteTeam"
-                            onclick="deleteTeam(event)"
-                        >
-                            Delete
-                        </button>
-                    </div>
-                </template>
-            </div>
-
-            <form id="createTeam">
-                <input
-                    id="newTeamName"
-                    type="text"
-                    placeholder="Team name"
-                    maxlength="32"
-                    autocomplete="off"
-                    required
-                >
-
-                <input
-                    id="newTeamColor"
-                    type="color"
-                    value="#ffffff"
-                    title="Team color"
-                >
-
-                <button type="submit">
-                    Create team
-                </button>
-            </form>
-        </div>
-
-        <div id="controlPanel">
-            <div class="adminPanelHeader">
-                <h2>Control Panel</h2>
-            </div>
-
-            <div id="winnerControls">
-                <label for="winnerSelect">
-                    Winner
-                </label>
-
-                <select id="winnerSelect">
-                    <option value="">
-                        Select a winner
-                    </option>
-                </select>
-
-                <button id="announceWinner">
-                    Announce Winner
-                </button>
-            </div>
-        </div>
-
     </div>
-
     <script type="module" src="./admin.mjs"></script>
 </body>

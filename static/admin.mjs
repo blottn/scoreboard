@@ -4,7 +4,6 @@ import {
     onDBUpdate
 } from "./db.mjs";
 
-
 /* ==================================================
    Players
    ================================================== */
@@ -879,3 +878,12 @@ announceWinnerButton.addEventListener(
         });
     }
 );
+
+window.deletePlayer = async function(event) {
+    let player_id = event.target.parentElement.id;
+    const db = getDB();
+    let trimmed = db.Users.filter(({ID}) => `${ID}` !== player_id);
+
+    db.Users = trimmed;
+    await sendDB(db);
+}
