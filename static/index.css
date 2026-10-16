@@ -47,17 +47,20 @@ body {
      * The triangles are intentionally very dark and
      * widely spaced so they don't compete with the UI.
      */
+
+    --theme-primary: rgba(255,255,255, 0.214);
+
     background-image:
         linear-gradient(
             135deg,
             transparent 0 49.5%,
-            rgba(255, 255, 255, 0.018) 50%,
+            var(--theme-primary) 50%,
             transparent 50.5%
         ),
         linear-gradient(
             315deg,
             transparent 0 49.5%,
-            rgba(255, 255, 255, 0.014) 50%,
+            var(--theme-primary) 50%,
             transparent 50.5%
         );
 
@@ -921,5 +924,52 @@ td.delete > span {
         background-color: #550000;
         color: red;
         transform: skew(-5deg);
+    }
+}
+
+/* game mode */
+
+#gameMode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &[admin]:hover {
+        cursor: pointer;
+    }
+
+    &[mode="player"] .playerMode {
+        color: white;
+        font-weight: bold;
+    }
+
+    &[mode="team"] .teamMode {
+        color: white;
+        font-weight: bold;
+    }
+
+    & > #gameModeStatus {
+        color: grey;
+        padding: 2px 8px;
+        display: flex;
+        gap: 16px;
+
+        & > .option {
+            margin: 8px 0px;
+        }
+        /* Full-height diagonal divider */
+        & > .option + .option {
+            position: relative;
+            &::before {
+              content: "";
+              position: absolute;
+              left: -8px;
+              top: 0;
+              bottom: 0;
+              width: 1px;
+              background: #777;
+              transform: skewX(-15deg);
+          }
+        }
     }
 }
