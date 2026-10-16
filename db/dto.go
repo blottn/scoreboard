@@ -36,6 +36,7 @@ func NewUser(name, team string) *User {
 type Team struct {
 	Name  string
 	Color string // I guess?
+	Score int
 }
 
 func NewTeam(name string, color string) *Team {
@@ -52,7 +53,7 @@ func NewTeam(name string, color string) *Team {
 		return found
 	}
 	t := Team{
-		name, color,
+		name, color, 0,
 	}
 	slog.Info(fmt.Sprintf("created team: %s", name))
 	DB.Teams = append(DB.Teams, &t)
