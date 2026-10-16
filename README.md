@@ -15,4 +15,5 @@ setting the current round / now playing bit
 communal whiteboard, ability to put stickers on other players, pretty animations
 
 ## TODO
-Allow name reassignment
+- toggle team vs individual mode
+- style based on current winner
