@@ -24,7 +24,12 @@ func main() {
 var listenAddr = flag.String("listen-addr", ":5352", "Where the http server listens")
 
 func run() error {
-	go db.Start()
+	go func() {
+		err := db.Start()
+		if err != nil {
+			slog.Error(err.Error())
+		}
+	}()
 	go func() {
 		for {
 			leases.CheckExpiries()
@@ -134,7 +139,7 @@ func run() error {
 
 	slog.Info(fmt.Sprintf("listening on %s", *listenAddr))
 
-	db.AddDevUsers()
+	// db.AddDevUsers()
 
 	err := http.ListenAndServe(*listenAddr, nil)
 	if err != nil {

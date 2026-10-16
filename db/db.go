@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	DBFilePath = flag.String("db-file-path", "/dev/null", "the path to where the db will initially be loaded from an then persisted to")
-	DBLoad     = flag.Bool("db-load", false, "whether the db should be loaded first")
-	DBSave     = flag.Bool("db-save", false, "whether the db should be saved routinely")
+	DBFilePath = flag.String("db-file-path", "live/live", "the path to where the db will initially be loaded from and then persisted to")
+	DBLoad     = flag.Bool("db-load", true, "whether the db should be loaded first")
+	DBSave     = flag.Bool("db-save", true, "whether the db should be saved routinely")
 	DBSaveRate = flag.Duration("db-save-rate", 1*time.Second, "How often at minimum the DB should be saved")
 )
 
@@ -65,12 +65,15 @@ func Load() error {
 	return json.Unmarshal(bs, &DB)
 }
 
+var version = 0
+
 func Save() error {
+	version += 1
 	bs, err := json.Marshal(DB)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(*DBFilePath, bs, 0x666)
+	return os.WriteFile(fmt.Sprintf("%s-%d", *DBFilePath, version), bs, 0o666)
 }
 
 func GetName(ID int) (string, bool) {
