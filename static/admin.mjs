@@ -936,3 +936,4 @@ window.deletePlayer = async function(event) {
     db.Users = trimmed;
     await sendDB(db);
 }
+

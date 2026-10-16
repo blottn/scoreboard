@@ -540,13 +540,15 @@ button:active {
 }
 
 #teams {
-    display: none;
     flex-direction: column;
     gap: 8px;
+    display: flex;
 }
 
-[mode="team"] #teams {
-    display: flex;
+body:not([admin]) {
+    &[mode="player"] #teams {
+        display: none;
+    }
 }
 
 .teamAdmin {

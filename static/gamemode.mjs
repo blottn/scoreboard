@@ -9,10 +9,9 @@ onDBUpdate((db) => {
 });
 
 // Check if we are on admin, make it clickable
-
 const isAdmin = window.location.href.endsWith("admin.html");
-
 if (isAdmin) {
+    body.setAttribute("admin", "yes");
     gameModeBlock.setAttribute("admin", "yes");
     gameModeBlock.addEventListener("click", () => {
         let db = getDB();
