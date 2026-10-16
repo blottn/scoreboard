@@ -141,7 +141,7 @@ const makeTeamOptions = (
 
 
 const makePlayerRow = (
-    { ID, Name, Team, Score },
+    { ID, Name, Team, Color, Score },
     Teams
 ) => {
     const row =
@@ -175,6 +175,11 @@ const makePlayerRow = (
         }
     );
 
+    let colPick = row.querySelector(".playerColPicker input");
+    if (document.activeElement !== colPick) {
+        colPick.value = Color;
+    }
+
     row.querySelector(
         ".score"
     ).textContent = Score;
@@ -190,7 +195,7 @@ const syncPlayers = (
     Teams
 ) => {
     Users.forEach(
-        ({ ID, Name, Team, Score }) => {
+        ({ ID, Name, Team, Color, Score }) => {
             let row =
                 playersTbl.querySelector(
                     `tr[id="${ID}"]`
@@ -202,6 +207,7 @@ const syncPlayers = (
                         ID,
                         Name,
                         Team,
+                        Color,
                         Score
                     },
                     Teams
@@ -762,6 +768,7 @@ const changeTeamColor = async (
 };
 
 
+
 /* ==================================================
    Team deletion
    ================================================== */
@@ -934,6 +941,19 @@ window.deletePlayer = async function(event) {
     let trimmed = db.Users.filter(({ID}) => `${ID}` !== player_id);
 
     db.Users = trimmed;
+    await sendDB(db);
+}
+
+window.setPlayerColor = async function(event) {
+    let player_id = event.target.parentElement.parentElement.id;
+    const db = getDB();
+    db.Users = db.Users.map((User) => {
+        if (`${User.ID}` === player_id) {
+            User.Color = event.target.value;
+        }
+        return User;
+    });
+
     await sendDB(db);
 }
 

@@ -37,6 +37,7 @@
                         <tr>
                             <th>Player Name</th>
                             <th>Player Team</th>
+                            <th>Player Colour</th>
                             <th>Player Score</th>
                             <th>Delete</th>
                         </tr>
@@ -49,6 +50,10 @@
 
                                 <td class="team">
                                     <select class="teamSelect"></select>
+                                </td>
+                                <td class="playerColPicker">
+                                    <input class="teamColor" type="color" value="#ffffff" title="Team color"
+                                        onchange="setPlayerColor(event)">
                                 </td>
                                 <td
                                     class="score"
