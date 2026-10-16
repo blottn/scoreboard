@@ -39,7 +39,7 @@ body {
     background-color: var(--bg);
     color: var(--text);
     font-size: 16px;
-
+    --theme-primary: var(--winning-color);
     /*
      * Subtle geometric texture.
      *
@@ -47,8 +47,6 @@ body {
      * The triangles are intentionally very dark and
      * widely spaced so they don't compete with the UI.
      */
-
-    --theme-primary: rgba(255,255,255, 0.214);
 
     background-image:
         linear-gradient(
