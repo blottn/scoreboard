@@ -262,6 +262,33 @@ const syncTeams = (
    DB synchronization
    ================================================== */
 
+const sortScores = () => {
+    let children = [...scoreBody.children].filter((e) => e.nodeName === "TR");
+
+    let newChildren = children.map((e) => ({e, "v": parseInt(e.querySelector(".score").innerText)}))
+        .map((x, oldPos) => ({...x, oldPos}))
+        .toSorted((a, b) => {
+            if (a.v < b.v) {
+                return 1;
+            }
+            if (a.v == b.v) {
+                return parseInt(a.e.id) - parseInt(b.e.id);
+            }
+            return -1;
+        })
+        .map(({oldPos}, newPos) => ({oldPos, newPos}))
+        .forEach(({oldPos, newPos}) => {
+            if (newPos === oldPos) {
+                return
+            }
+            let el = children[oldPos]
+            el.parentElement.removeChild(el);
+            scoreBody.appendChild(el);
+        });
+    let tmpl = [...scoreBody.children].filter((e) => e.nodeName === "TEMPLATE");
+
+}
+
 const sync = ({
     Users,
     Teams
@@ -272,6 +299,8 @@ const sync = ({
         Users,
         Teams
     );
+    // Sort scores
+    sortScores();
 };
 
 onDBUpdate(sync);
