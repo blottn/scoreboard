@@ -876,6 +876,7 @@ announceWinnerButton.addEventListener(
              * A player's winner banner uses
              * their team's color.
              */
+            
             const team =
                 db.Teams.find(
                     ({ Name }) =>
@@ -920,6 +921,13 @@ announceWinnerButton.addEventListener(
 
             winnerColor =
                 team.Color;
+        }
+
+
+        if (db.Mode === "player" && value.startsWith("player:")) {
+            let pid = value.split(':')[1]
+            console.log(pid);
+            winnerColor = db.Users.filter(({ID}) => `${ID}` === pid)[0].Color;
         }
 
 
