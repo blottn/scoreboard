@@ -17,3 +17,5 @@ communal whiteboard, ability to put stickers on other players, pretty animations
 ## TODO
 - toggle team vs individual mode
 - style based on current winner
+- player hover color is their color regularly or team color
+- winner color is player / team color
