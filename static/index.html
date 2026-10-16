@@ -17,7 +17,12 @@
         src="./announcement.mjs"
         type="module"
     ></script>
-
+    
+    <script
+        async
+        src="./color.mjs"
+        type="module"
+            ></script>
 </head>
 
 <body>
@@ -74,6 +79,21 @@
 
     <div id="pageBody">
         <div id="mainView">
+
+            <div id="teams">
+                <table>
+                    <tbody>
+                        <template>
+                            <tr>
+                                <td class="teamName"></td>
+                                <td class="teamTotalScore"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+
             <div id="scores">
                 <table>
                     <thead>
@@ -105,18 +125,6 @@
             </div>
 
 
-            <div id="teams">
-                <table>
-                    <tbody>
-                        <template>
-                            <tr>
-                                <td class="teamName"></td>
-                                <td class="teamTotalScore"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 </body>

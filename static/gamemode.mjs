@@ -27,3 +27,6 @@ if (isAdmin) {
     });
 }
 
+export const getUserColor = (ID) => {
+    let db = getDB();
+}
