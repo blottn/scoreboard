@@ -11,6 +11,7 @@ type User struct {
 	Name    string
 	Team    string // FK team
 	Claimer string
+	Color   string // If no team, this is their primary color
 	Score   float64
 }
 
@@ -22,6 +23,7 @@ func NewUser(name, team string) *User {
 		ID:      lastID,
 		Name:    name,
 		Team:    team,
+		Color:   "grey",
 		Claimer: "",
 		Score:   0.,
 	}
